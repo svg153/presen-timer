@@ -1,12 +1,105 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useEffect } from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import TimerSection from '@/components/TimerSection';
+import SectionInput from '@/components/SectionInput';
+import SectionsList from '@/components/SectionsList';
+import useTimer from '@/hooks/useTimer';
+import { calculateProgress, loadFromLocalStorage } from '@/utils/timerUtils';
+import { Toaster } from '@/components/ui/sonner';
 
 const Index = () => {
+  const {
+    sections,
+    currentSectionIndex,
+    timeRemaining,
+    isRunning,
+    isWarning,
+    isSidebarOpen,
+    setSections,
+    toggleTimer,
+    resetSection,
+    nextSection,
+    prevSection,
+    jumpToSection,
+    addExtraTime,
+    toggleFullscreen,
+    toggleSidebar,
+    endPresentation
+  } = useTimer();
+
+  // Load saved sections from localStorage on mount
+  useEffect(() => {
+    const savedSections = loadFromLocalStorage();
+    if (savedSections.length > 0) {
+      setSections(savedSections);
+    }
+  }, [setSections]);
+
+  // Calculate progress percentage
+  const progress = calculateProgress(
+    sections,
+    currentSectionIndex,
+    timeRemaining
+  );
+
+  // Check if current section is last
+  const isLastSection = currentSectionIndex === sections.length - 1;
+  
+  // Calculate if we can navigate back or forward
+  const canGoBack = currentSectionIndex > 0;
+  const canGoForward = currentSectionIndex < sections.length - 1;
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Navbar toggleSidebar={toggleSidebar} />
+      
+      <SectionsList
+        sections={sections}
+        currentSectionIndex={currentSectionIndex}
+        jumpToSection={jumpToSection}
+        isOpen={isSidebarOpen}
+      />
+      
+      <main className={`flex-1 mt-16 mb-12 py-8 px-4 transition-all duration-300 ${
+        isSidebarOpen ? 'md:ml-72' : 'ml-0'
+      }`}>
+        <div className="container mx-auto max-w-4xl">
+          {sections.length === 0 ? (
+            <div className="py-12">
+              <h1 className="text-3xl font-bold text-center mb-8 text-github-light">
+                Presentation <span className="text-github-purple">Timer</span>
+              </h1>
+              
+              <SectionInput onSetSections={setSections} />
+            </div>
+          ) : (
+            <div className="py-4">
+              <TimerSection
+                name={sections[currentSectionIndex].name}
+                timeRemaining={timeRemaining}
+                isWarning={isWarning}
+                isRunning={isRunning}
+                isLastSection={isLastSection}
+                progress={progress}
+                toggleTimer={toggleTimer}
+                resetSection={resetSection}
+                nextSection={nextSection}
+                prevSection={prevSection}
+                addExtraTime={addExtraTime}
+                toggleFullscreen={toggleFullscreen}
+                endPresentation={endPresentation}
+                canGoBack={canGoBack}
+                canGoForward={canGoForward}
+              />
+            </div>
+          )}
+        </div>
+      </main>
+      
+      <Footer />
+      <Toaster position="bottom-right" />
     </div>
   );
 };
