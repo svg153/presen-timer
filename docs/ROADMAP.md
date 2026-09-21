@@ -99,7 +99,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - UI: botones en `SectionInput` (guardar) y select encima del textarea (cargar).
 - **Criterios**: crear/cargar/eliminar presets; el preset activo se marca; sobrevive a reload.
 
-### 6. Import / export JSON 📋
+### 6. Import / export JSON ✅
 
 - Exportar preset actual (o todos) a archivo `.json` descargable; importar con `<input type="file">`.
 - Validar el JSON importado (nombre string, duración number > 0); error visible con toast si es inválido.
