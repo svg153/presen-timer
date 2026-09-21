@@ -5,7 +5,9 @@ import Footer from '@/components/Footer';
 import TimerSection from '@/components/TimerSection';
 import SectionInput from '@/components/SectionInput';
 import SectionsList from '@/components/SectionsList';
+import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog';
 import useTimer from '@/hooks/useTimer';
+import useKeyboardShortcuts from '@/hooks/useKeyboardShortcuts';
 import { calculateProgress, loadFromLocalStorage } from '@/utils/timerUtils';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -32,6 +34,16 @@ const Index = () => {
     endPresentation
   } = useTimer();
 
+  const { isHelpOpen, setIsHelpOpen } = useKeyboardShortcuts({
+    onToggleTimer: toggleTimer,
+    onNextSection: nextSection,
+    onPrevSection: prevSection,
+    onResetSection: resetSection,
+    onToggleFullscreen: toggleFullscreen,
+    onAddExtraTime: addExtraTime,
+    enabled: sections.length > 0
+  });
+
   // Load saved sections from localStorage on mount
   useEffect(() => {
     const savedSections = loadFromLocalStorage();
@@ -56,7 +68,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar toggleSidebar={toggleSidebar} />
+      <Navbar toggleSidebar={toggleSidebar} onOpenHelp={() => setIsHelpOpen(true)} />
       
       <SectionsList
         sections={sections}
@@ -109,6 +121,7 @@ const Index = () => {
       </main>
       
       <Footer />
+      <KeyboardShortcutsDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
       <Toaster position="bottom-right" />
     </div>
   );
