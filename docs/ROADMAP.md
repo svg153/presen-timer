@@ -123,10 +123,11 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 ## P2 — Diferenciación
 
-### 9. Estadísticas de presentación 📋
+### 9. Estadísticas de presentación ✅
 
 - Al terminar, resumen: tiempo planificado vs real por sección (requiere registrar timestamps de inicio/fin de cada sección).
 - Vista con `recharts` (ya en dependencias) o tabla simple; opción de copiar resumen.
+- Implementado en #15: grabador de tiempo real (wall-clock en RUNNING) por sección en `useTimer`, `StatsDialog` con gráfico recharts + tabla de diffs + copiar (tab-separated); auto-abre al terminar y botón manual en controles.
 
 ### 10. Plantillas de formato 📋
 
