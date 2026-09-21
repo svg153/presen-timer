@@ -55,8 +55,11 @@ describe('formatTime', () => {
     expect(formatTime(3661)).toBe('01:01:01');
   });
 
-  it('no muestra tiempos negativos', () => {
-    expect(formatTime(-5)).toBe('00:00');
+  it('marca los tiempos negativos como tiempo extra', () => {
+    // El overtime (P0-2) hace que la cuenta atrás sea negativa a propósito:
+    // formatTime la representa con signo menos para que se lea como "de más".
+    expect(formatTime(-5)).toBe('-00:05');
+    expect(formatTime(-3661)).toBe('-01:01:01');
   });
 });
 
