@@ -4,6 +4,10 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Vite 8 warns about `__dirname` because it plans to load the config natively
+// (no transpile step), where only `import.meta.dirname` exists.
+const rootDir = import.meta.dirname;
+
 // GitHub Pages project sites are served from https://<user>.github.io/<repo>/,
 // so the bundle needs a matching base path. Override with VITE_BASE_PATH (e.g. "/")
 // when serving from a user/org page or a custom domain.
@@ -44,7 +48,7 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(rootDir, "./src"),
     },
   },
 }));
