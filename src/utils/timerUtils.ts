@@ -30,10 +30,16 @@ export const parseSections = (text: string): { name: string; duration: number }[
     .split('\n')
     .filter(line => line.trim())
     .map(line => {
-      const [name, timeStr] = line.split(':').map(part => part.trim());
-      
+      // Split on the *last* colon so a name that contains one still round-trips
+      // through the bulk text editor, which writes "Name: 5m" per line.
+      const separator = line.lastIndexOf(':');
+      if (separator === -1) return null;
+
+      const name = line.slice(0, separator).trim();
+      const timeStr = line.slice(separator + 1).trim();
+
       if (!name || !timeStr) return null;
-      
+
       const duration = parseTimeString(timeStr);
       return { name, duration };
     })

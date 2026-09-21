@@ -34,6 +34,18 @@ export const es: Dictionary = {
     cancel: 'Cancelar',
     deleteAction: 'Eliminar',
   },
+  bulkEdit: {
+    open: 'Editar todas las secciones como texto',
+    title: 'Editar todas las secciones',
+    subtitle:
+      'Una sección por línea con el formato "Nombre: duración" (p. ej. "Intro: 5m" o "Preguntas: 1h").',
+    placeholder: 'Intro: 5m\nContenido principal: 15m\nDemo: 10m\nPreguntas: 5m',
+    preview: 'Secciones detectadas: {count} · Total: {total}',
+    empty: 'Todavía no hay ninguna línea válida. Usa el formato "Nombre: 5m".',
+    resetWarning: 'Al aplicar se vuelve a la primera sección y se detiene la cuenta atrás.',
+    cancel: 'Cancelar',
+    apply: 'Aplicar',
+  },
   controls: {
     previous: 'Sección anterior',
     next: 'Sección siguiente',
