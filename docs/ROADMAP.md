@@ -111,12 +111,13 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - **Screen Wake Lock API** activa mientras el timer corre (`navigator.wakeLock.request('screen')`), liberar al pausar/terminar; reintentar al volver la visibilidad.
 - **Criterios**: instalable desde el navegador; pantalla no se apaga con timer corriendo; funciona offline tras primera carga.
 
-### 8. Modo presentador 📋
+### 8. Modo presentador ✅
 
 - Vista fullscreen minimalista: solo nombre de sección + tiempo gigante + barra de progreso.
 - **Semáforo por color de fondo**: verde (>60s), ámbar (≤60s), rojo (≤10s o negativo) — umbrales configurables.
 - Entrar/salir con `F` o botón; ocultar cursor tras 3s de inactividad.
 - **Criterios**: fullscreen real; colores cambian en los umbrales; legible a distancia (texto ≥ 20vh).
+- Implementado en #14: overlay `PresenterView`, umbrales persistidos en localStorage, `isFullscreen` sincronizado con evento `fullscreenchange`.
 
 ---
 
