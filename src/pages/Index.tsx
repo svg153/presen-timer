@@ -31,7 +31,11 @@ const Index = () => {
     toggleFullscreen,
     toggleSidebar,
     setAutoAdvance,
-    endPresentation
+    endPresentation,
+    updateSection,
+    deleteSection,
+    moveSection,
+    addSection
   } = useTimer();
 
   const { isHelpOpen, setIsHelpOpen } = useKeyboardShortcuts({
@@ -74,6 +78,10 @@ const Index = () => {
         sections={sections}
         currentSectionIndex={currentSectionIndex}
         jumpToSection={jumpToSection}
+        updateSection={updateSection}
+        deleteSection={deleteSection}
+        moveSection={moveSection}
+        addSection={addSection}
         isOpen={isSidebarOpen}
       />
       

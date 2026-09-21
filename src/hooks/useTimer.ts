@@ -325,6 +325,116 @@ const useTimer = () => {
     }));
   }, []);
   
+  // Edit a section's name/duration. Editing the current section's duration
+  // resets it to the full new duration (running or paused); name-only edits
+  // never affect timing.
+  const updateSection = useCallback((index: number, patch: Partial<TimerSection>) => {
+    const prev = stateRef.current;
+    if (index < 0 || index >= prev.sections.length) return;
+
+    const newSections = prev.sections.map((s, i) =>
+      i === index ? { ...s, ...patch } : s
+    );
+    saveToLocalStorage(newSections);
+
+    if (index === prev.currentSectionIndex && patch.duration !== undefined && patch.duration !== prev.sections[index].duration) {
+      const newDuration = patch.duration;
+      endAtRef.current = prev.isRunning ? Date.now() + newDuration * 1000 : null;
+      setState({
+        ...prev,
+        sections: newSections,
+        timeRemaining: newDuration,
+        isWarning: prev.isRunning && newDuration <= WARNING_THRESHOLD,
+        isOvertime: false
+      });
+    } else {
+      setState({ ...prev, sections: newSections });
+    }
+  }, []);
+
+  // Delete a section. Deleting the current one pauses the timer and lands
+  // on the section that takes its place (or the previous one if it was last).
+  const deleteSection = useCallback((index: number) => {
+    const prev = stateRef.current;
+    if (index < 0 || index >= prev.sections.length) return;
+
+    const newSections = prev.sections.filter((_, i) => i !== index);
+    saveToLocalStorage(newSections);
+
+    if (newSections.length === 0) {
+      endAtRef.current = null;
+      setState({
+        ...prev,
+        sections: newSections,
+        currentSectionIndex: 0,
+        timeRemaining: 0,
+        isRunning: false,
+        isWarning: false,
+        isOvertime: false
+      });
+      return;
+    }
+
+    let newIndex = prev.currentSectionIndex;
+    if (index === prev.currentSectionIndex) {
+      newIndex = Math.min(index, newSections.length - 1);
+    } else if (index < prev.currentSectionIndex) {
+      newIndex = prev.currentSectionIndex - 1;
+    }
+
+    const wasCurrent = index === prev.currentSectionIndex;
+    if (wasCurrent) endAtRef.current = null;
+
+    setState({
+      ...prev,
+      sections: newSections,
+      currentSectionIndex: newIndex,
+      timeRemaining: wasCurrent ? newSections[newIndex].duration : prev.timeRemaining,
+      isRunning: wasCurrent ? false : prev.isRunning,
+      isWarning: wasCurrent ? false : prev.isWarning,
+      isOvertime: wasCurrent ? false : prev.isOvertime
+    });
+  }, []);
+
+  // Move a section up/down. Reordering pauses the timer and resets the
+  // current section to its full duration to avoid ambiguous elapsed time.
+  const moveSection = useCallback((index: number, direction: -1 | 1) => {
+    const prev = stateRef.current;
+    const target = index + direction;
+    if (index < 0 || index >= prev.sections.length || target < 0 || target >= prev.sections.length) return;
+
+    const newSections = [...prev.sections];
+    [newSections[index], newSections[target]] = [newSections[target], newSections[index]];
+    saveToLocalStorage(newSections);
+
+    let newIndex = prev.currentSectionIndex;
+    if (index === prev.currentSectionIndex) newIndex = target;
+    else if (target === prev.currentSectionIndex) newIndex = index;
+
+    endAtRef.current = null;
+    setState({
+      ...prev,
+      sections: newSections,
+      currentSectionIndex: newIndex,
+      timeRemaining: newSections[newIndex].duration,
+      isRunning: false,
+      isWarning: false,
+      isOvertime: false
+    });
+  }, []);
+
+  // Append a new section at the end; never interrupts the running timer.
+  const addSection = useCallback(() => {
+    const prev = stateRef.current;
+    const newSection: TimerSection = {
+      name: `Section ${prev.sections.length + 1}`,
+      duration: 300
+    };
+    const newSections = [...prev.sections, newSection];
+    saveToLocalStorage(newSections);
+    setState({ ...prev, sections: newSections });
+  }, []);
+
   // End presentation
   const endPresentation = useCallback(() => {
     endAtRef.current = null;
@@ -351,7 +461,11 @@ const useTimer = () => {
     toggleFullscreen,
     toggleSidebar,
     setAutoAdvance,
-    endPresentation
+    endPresentation,
+    updateSection,
+    deleteSection,
+    moveSection,
+    addSection
   };
 };
 
