@@ -46,7 +46,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 ---
 
-### 3. Atajos de teclado 📋
+### 3. Atajos de teclado ✅
 
 **Spec**:
 - `Espacio` → play/pausa
