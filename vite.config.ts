@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { VitePWA } from "vite-plugin-pwa";
 
 // GitHub Pages project sites are served from https://<user>.github.io/<repo>/,
 // so the bundle needs a matching base path. Override with VITE_BASE_PATH (e.g. "/")
@@ -19,6 +20,27 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' &&
     componentTagger(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'notification.mp3', 'og-image.png'],
+      manifest: {
+        name: 'PresenTimer - Presentation Timer App',
+        short_name: 'PresenTimer',
+        description: 'A minimalist presentation timer with section management',
+        theme_color: '#4f46e5',
+        background_color: '#0f172a',
+        display: 'standalone',
+        start_url: '.',
+        icons: [
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+        ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,mp3}']
+      }
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {
