@@ -92,7 +92,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 ## P1 — Valor de usuario
 
-### 5. Presets múltiples 📋
+### 5. Presets múltiples ✅
 
 - Guardar la lista actual como preset con nombre; cargar preset desde un select; eliminar preset.
 - Nueva `STORAGE_KEY` (`presentation-timer-presets`): `{ name, sections }[]`.
