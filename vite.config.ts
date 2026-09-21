@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'notification.mp3', 'og-image.png'],
+      includeAssets: ['favicon.ico', 'notification.wav', 'og-image.png'],
       manifest: {
         name: 'PresenTimer - Presentation Timer App',
         short_name: 'PresenTimer',
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,mp3}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,wav}']
       }
     }),
   ].filter(Boolean),
