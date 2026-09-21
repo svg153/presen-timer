@@ -134,10 +134,11 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - Presets incluidos de fábrica: Lightning talk (5m), Charla (20m), Taller (90m), Defensa TFG (15m)... seleccionables sin configurar nada.
 - Implementado en #16: 5 plantillas read-only en código (`templateUtils.ts`) agrupadas en el select de presets bajo "Templates"; no se siembran en localStorage (save/delete/export/import solo tocan presets de usuario); cargar una rellena el textarea y crea las secciones.
 
-### 11. i18n + tema claro/oscuro 📋
+### 11. i18n + tema claro/oscuro ✅
 
-- i18n ES/EN (extraer strings a diccionarios; evaluar `react-i18next` vs diccionario propio — decidir con `[AI-DECISION]`).
-- Tema claro/oscuro con `next-themes` (ya en dependencias).
+- i18n ES/EN: diccionario propio + React context (`src/i18n/`, ~101 keys), sin dependencias nuevas. Detección por navegador, persistencia en localStorage, interpolación `{var}`.
+- Tema claro/oscuro: paleta GitHub como CSS variables (`:root` + `.dark`) en `index.css`/`tailwind.config.ts` con `<alpha-value>`, `next-themes` (dark por defecto) y toggle Sol/Luna en la navbar. Cero cambios de clases en componentes.
+- Nota: el texto de estadísticas copiado sigue el idioma de la UI; las brand strings ("PresenTimer") no se traducen. PR #17.
 
 ### 12. Mando remoto 📋 ⏸️
 
