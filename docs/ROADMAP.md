@@ -143,7 +143,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 ### 12. Mando remoto 📋 ⏸️
 
 - Controlar el timer desde el móvil (QR + WebRTC/BroadcastChannel o pequeño servidor).
-- **Postergada**: requiere decisión de arquitectura (¿sin servidor con BroadcastChannel?, ¿peerjs?, ¿backend?) que rompería los flujos actuales. Analizar cuando P0/P1 estén estables.
+- **Postergada**: requiere decisión de arquitectura (¿sin servidor con BroadcastChannel?, ¿peerjs?, ¿backend?) que rompería los flujos actuales. Analizar cuando P0/P1 estén estables. Ticket de decisión: #18.
 
 ---
 
