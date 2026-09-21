@@ -1,7 +1,6 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { saveToLocalStorage } from '@/utils/timerUtils';
+import { saveToLocalStorage, secondsLeftFromEnd } from '@/utils/timerUtils';
 
 export interface TimerSection {
   name: string;
@@ -18,6 +17,8 @@ interface TimerState {
   isSidebarOpen: boolean;
 }
 
+const WARNING_THRESHOLD = 30;
+
 const useTimer = () => {
   const [state, setState] = useState<TimerState>({
     sections: [],
@@ -28,6 +29,17 @@ const useTimer = () => {
     isFullscreen: false,
     isSidebarOpen: true
   });
+
+  // Mirror of state for imperative reads (interval callbacks, actions)
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  // Absolute end timestamp (ms) for the current section while running.
+  // The countdown is derived from Date.now() so it never drifts,
+  // even with throttled background tabs or irregular interval firing.
+  const endAtRef = useRef<number | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -45,54 +57,65 @@ const useTimer = () => {
     };
   }, []);
 
-  // Timer tick logic
+  const playNotification = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.play().catch(err => console.error('Failed to play audio:', err));
+    }
+  }, []);
+
+  // Timer tick: derive remaining seconds from the end timestamp
   useEffect(() => {
     if (state.isRunning) {
       timerRef.current = window.setInterval(() => {
-        setState(prevState => {
-          let newTimeRemaining = prevState.timeRemaining - 1;
-          let newCurrentSectionIndex = prevState.currentSectionIndex;
-          let newIsWarning = prevState.isWarning;
-          
-          // Check if section is complete
-          if (newTimeRemaining <= 0) {
-            // Play notification sound
-            if (audioRef.current) {
-              audioRef.current.play().catch(err => console.error('Failed to play audio:', err));
-            }
-            
-            // Move to next section if available
-            if (newCurrentSectionIndex < prevState.sections.length - 1) {
-              newCurrentSectionIndex += 1;
-              newTimeRemaining = prevState.sections[newCurrentSectionIndex].duration;
-              
-              // Show notification
-              toast({
-                title: "Next Section",
-                description: `Now starting: ${prevState.sections[newCurrentSectionIndex].name}`
-              });
-            } else {
-              // End of presentation
-              return {
-                ...prevState,
-                timeRemaining: 0,
-                isRunning: false,
-                isWarning: false
-              };
-            }
-          }
-          
-          // Check if we should show warning (30 seconds remaining)
-          newIsWarning = newTimeRemaining <= 30 && newTimeRemaining > 0;
-          
-          return {
-            ...prevState,
-            timeRemaining: newTimeRemaining,
-            currentSectionIndex: newCurrentSectionIndex,
-            isWarning: newIsWarning
-          };
-        });
-      }, 1000);
+        const endAt = endAtRef.current;
+        if (endAt === null) return;
+
+        const secondsLeft = secondsLeftFromEnd(endAt, Date.now());
+        const prev = stateRef.current;
+
+        // Avoid re-renders while the displayed second hasn't changed
+        if (secondsLeft === prev.timeRemaining && secondsLeft > 0) return;
+
+        if (secondsLeft > 0) {
+          setState({
+            ...prev,
+            timeRemaining: secondsLeft,
+            isWarning: secondsLeft <= WARNING_THRESHOLD
+          });
+          return;
+        }
+
+        // Section finished
+        playNotification();
+
+        if (prev.currentSectionIndex < prev.sections.length - 1) {
+          const nextIndex = prev.currentSectionIndex + 1;
+          const nextDuration = prev.sections[nextIndex].duration;
+
+          endAtRef.current = Date.now() + nextDuration * 1000;
+
+          toast({
+            title: "Next Section",
+            description: `Now starting: ${prev.sections[nextIndex].name}`
+          });
+
+          setState({
+            ...prev,
+            currentSectionIndex: nextIndex,
+            timeRemaining: nextDuration,
+            isWarning: nextDuration <= WARNING_THRESHOLD
+          });
+        } else {
+          // End of presentation
+          endAtRef.current = null;
+          setState({
+            ...prev,
+            timeRemaining: 0,
+            isRunning: false,
+            isWarning: false
+          });
+        }
+      }, 250);
     } else if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -104,114 +127,129 @@ const useTimer = () => {
         timerRef.current = null;
       }
     };
-  }, [state.isRunning]);
+  }, [state.isRunning, playNotification]);
   
   // Set sections
   const setSections = useCallback((newSections: TimerSection[]) => {
-    setState(prev => {
-      const updatedState = {
-        ...prev,
-        sections: newSections,
-        currentSectionIndex: 0,
-        timeRemaining: newSections.length > 0 ? newSections[0].duration : 0,
-        isRunning: false,
-        isWarning: false
-      };
-      
-      // Save to localStorage
-      saveToLocalStorage(newSections);
-      
-      return updatedState;
-    });
+    endAtRef.current = null;
+    saveToLocalStorage(newSections);
+
+    setState(prev => ({
+      ...prev,
+      sections: newSections,
+      currentSectionIndex: 0,
+      timeRemaining: newSections.length > 0 ? newSections[0].duration : 0,
+      isRunning: false,
+      isWarning: false
+    }));
   }, []);
   
   // Start/pause timer
   const toggleTimer = useCallback(() => {
-    setState(prev => {
-      if (prev.sections.length === 0) return prev;
-      
-      return {
+    const prev = stateRef.current;
+    if (prev.sections.length === 0) return;
+
+    if (prev.isRunning) {
+      // Pause: freeze the remaining time from the end timestamp
+      const endAt = endAtRef.current;
+      const remaining = endAt !== null ? secondsLeftFromEnd(endAt, Date.now()) : prev.timeRemaining;
+      endAtRef.current = null;
+      setState({
         ...prev,
-        isRunning: !prev.isRunning
-      };
-    });
+        isRunning: false,
+        timeRemaining: remaining,
+        isWarning: remaining > 0 && remaining <= WARNING_THRESHOLD
+      });
+    } else {
+      // Resume: derive a fresh end timestamp from the remaining time
+      endAtRef.current = Date.now() + prev.timeRemaining * 1000;
+      setState({
+        ...prev,
+        isRunning: true
+      });
+    }
   }, []);
   
   // Reset current section
   const resetSection = useCallback(() => {
-    setState(prev => {
-      if (prev.sections.length === 0) return prev;
-      
-      return {
-        ...prev,
-        timeRemaining: prev.sections[prev.currentSectionIndex].duration,
-        isRunning: false,
-        isWarning: false
-      };
+    const prev = stateRef.current;
+    if (prev.sections.length === 0) return;
+
+    endAtRef.current = null;
+    setState({
+      ...prev,
+      timeRemaining: prev.sections[prev.currentSectionIndex].duration,
+      isRunning: false,
+      isWarning: false
     });
   }, []);
   
   // Skip to next section
   const nextSection = useCallback(() => {
-    setState(prev => {
-      if (prev.sections.length === 0 || prev.currentSectionIndex >= prev.sections.length - 1) {
-        return prev;
-      }
-      
-      const newIndex = prev.currentSectionIndex + 1;
-      
-      // Play notification sound
-      if (audioRef.current) {
-        audioRef.current.play().catch(err => console.error('Failed to play audio:', err));
-      }
-      
-      return {
-        ...prev,
-        currentSectionIndex: newIndex,
-        timeRemaining: prev.sections[newIndex].duration,
-        isWarning: false
-      };
+    const prev = stateRef.current;
+    if (prev.sections.length === 0 || prev.currentSectionIndex >= prev.sections.length - 1) {
+      return;
+    }
+    
+    const newIndex = prev.currentSectionIndex + 1;
+    const newDuration = prev.sections[newIndex].duration;
+
+    playNotification();
+    endAtRef.current = prev.isRunning ? Date.now() + newDuration * 1000 : null;
+
+    setState({
+      ...prev,
+      currentSectionIndex: newIndex,
+      timeRemaining: newDuration,
+      isWarning: false
     });
-  }, []);
+  }, [playNotification]);
   
   // Go to previous section
   const prevSection = useCallback(() => {
-    setState(prev => {
-      if (prev.sections.length === 0 || prev.currentSectionIndex <= 0) {
-        return prev;
-      }
-      
-      const newIndex = prev.currentSectionIndex - 1;
-      
-      return {
-        ...prev,
-        currentSectionIndex: newIndex,
-        timeRemaining: prev.sections[newIndex].duration,
-        isWarning: false
-      };
+    const prev = stateRef.current;
+    if (prev.sections.length === 0 || prev.currentSectionIndex <= 0) {
+      return;
+    }
+    
+    const newIndex = prev.currentSectionIndex - 1;
+    const newDuration = prev.sections[newIndex].duration;
+
+    endAtRef.current = prev.isRunning ? Date.now() + newDuration * 1000 : null;
+
+    setState({
+      ...prev,
+      currentSectionIndex: newIndex,
+      timeRemaining: newDuration,
+      isWarning: false
     });
   }, []);
   
   // Jump to specific section
   const jumpToSection = useCallback((index: number) => {
-    setState(prev => {
-      if (index < 0 || index >= prev.sections.length) return prev;
-      
-      return {
-        ...prev,
-        currentSectionIndex: index,
-        timeRemaining: prev.sections[index].duration,
-        isWarning: false,
-        isRunning: false
-      };
+    const prev = stateRef.current;
+    if (index < 0 || index >= prev.sections.length) return;
+
+    endAtRef.current = null;
+    setState({
+      ...prev,
+      currentSectionIndex: index,
+      timeRemaining: prev.sections[index].duration,
+      isWarning: false,
+      isRunning: false
     });
   }, []);
   
   // Add extra time to current section
   const addExtraTime = useCallback((seconds: number) => {
-    setState(prev => ({
-      ...prev,
-      timeRemaining: prev.timeRemaining + seconds
+    const prev = stateRef.current;
+    if (prev.isRunning && endAtRef.current !== null) {
+      endAtRef.current += seconds * 1000;
+    }
+
+    setState(p => ({
+      ...p,
+      timeRemaining: p.timeRemaining + seconds
     }));
     
     toast({
@@ -249,6 +287,7 @@ const useTimer = () => {
   
   // End presentation
   const endPresentation = useCallback(() => {
+    endAtRef.current = null;
     setState(prev => ({
       ...prev,
       isRunning: false

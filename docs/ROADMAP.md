@@ -8,7 +8,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 ## P0 — Fundamentos y correcciones
 
-### 1. Precisión del timer 📋
+### 1. Precisión del timer ✅
 
 **Problema**: `setInterval` de 1000ms deriva (acumula retraso real; en una charla de 30 min puede desviar >10s).
 
@@ -149,3 +149,4 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - Toda decisión con opciones → `[AI-DECISION]` en la PR (issue maestro #4).
 - Actualizar el estado (📋/🚧/✅) de esta tabla en cada PR que toque una feature.
 - Si una feature de P1/P2 requiere análisis profundo, postérgala con ⏸️ y crea ticket.
+
