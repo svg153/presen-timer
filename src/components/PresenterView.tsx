@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { X, Settings2 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { formatTime } from '@/utils/timerUtils';
+import { useI18n } from '@/i18n';
 
 interface PresenterViewProps {
   name: string;
@@ -35,6 +36,7 @@ const loadThresholds = (): Thresholds => {
 };
 
 const PresenterView = ({ name, timeRemaining, isOvertime, progress, onExit }: PresenterViewProps) => {
+  const { t } = useI18n();
   const [thresholds, setThresholds] = useState<Thresholds>(loadThresholds);
   const [showSettings, setShowSettings] = useState(false);
   const [cursorIdle, setCursorIdle] = useState(false);
@@ -98,14 +100,14 @@ const PresenterView = ({ name, timeRemaining, isOvertime, progress, onExit }: Pr
         <>
           <button
             onClick={onExit}
-            aria-label="Exit presenter mode"
+            aria-label={t('presenter.exit')}
             className="absolute top-4 right-4 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
           <button
             onClick={() => setShowSettings(s => !s)}
-            aria-label="Presenter thresholds settings"
+            aria-label={t('presenter.settings')}
             className="absolute top-4 right-16 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
           >
             <Settings2 className="h-6 w-6" />
@@ -114,7 +116,7 @@ const PresenterView = ({ name, timeRemaining, isOvertime, progress, onExit }: Pr
             <div className="absolute top-16 right-4 w-72 rounded-lg bg-slate-900/95 p-4 text-white space-y-4 shadow-xl">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span>Amber at</span>
+                  <span>{t('presenter.amberAt')}</span>
                   <span className="font-mono">{thresholds.amberSeconds}s</span>
                 </div>
                 <Slider
@@ -127,7 +129,7 @@ const PresenterView = ({ name, timeRemaining, isOvertime, progress, onExit }: Pr
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span>Red at</span>
+                  <span>{t('presenter.redAt')}</span>
                   <span className="font-mono">{thresholds.redSeconds}s</span>
                 </div>
                 <Slider
@@ -138,7 +140,7 @@ const PresenterView = ({ name, timeRemaining, isOvertime, progress, onExit }: Pr
                   onValueChange={([v]) => updateThresholds({ redSeconds: v })}
                 />
               </div>
-              <p className="text-xs text-white/60">Background turns amber when the section has this much time left, red at the last seconds (and in overtime).</p>
+              <p className="text-xs text-white/60">{t('presenter.thresholdsHint')}</p>
             </div>
           )}
         </>

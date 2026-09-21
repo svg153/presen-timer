@@ -2,6 +2,7 @@
 import { Play, Pause, SkipForward, RefreshCw, ChevronLeft, Timer, Maximize, X, FastForward, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { useI18n } from '@/i18n';
 
 interface TimerControlsProps {
   isRunning: boolean;
@@ -36,6 +37,7 @@ const TimerControls = ({
   canGoForward,
   onOpenStats
 }: TimerControlsProps) => {
+  const { t } = useI18n();
   return (
     <div className="flex flex-wrap gap-2 justify-center mt-4">
       {canGoBack && (
@@ -46,7 +48,7 @@ const TimerControls = ({
           className="bg-github-subtle border-github-subtle hover:bg-github-subtle/80"
         >
           <ChevronLeft className="h-4 w-4" />
-          <span className="sr-only">Previous Section</span>
+          <span className="sr-only">{t('controls.previous')}</span>
         </Button>
       )}
       
@@ -61,7 +63,7 @@ const TimerControls = ({
         ) : (
           <Play className="h-4 w-4" />
         )}
-        <span className="sr-only">{isRunning ? 'Pause' : 'Play'}</span>
+        <span className="sr-only">{isRunning ? t('controls.pause') : t('controls.play')}</span>
       </Button>
       
       <Button
@@ -71,7 +73,7 @@ const TimerControls = ({
         className="bg-github-subtle border-github-subtle hover:bg-github-subtle/80"
       >
         <RefreshCw className="h-4 w-4" />
-        <span className="sr-only">Reset</span>
+        <span className="sr-only">{t('controls.reset')}</span>
       </Button>
       
       {isLastSection ? (
@@ -93,7 +95,7 @@ const TimerControls = ({
             className="bg-github-subtle border-github-subtle hover:bg-github-subtle/80"
           >
             <X className="h-4 w-4 mr-2" />
-            <span>End</span>
+            <span>{t('controls.end')}</span>
           </Button>
         </>
       ) : (
@@ -105,7 +107,7 @@ const TimerControls = ({
             className="bg-github-subtle border-github-subtle hover:bg-github-subtle/80"
           >
             <SkipForward className="h-4 w-4" />
-            <span className="sr-only">Next Section</span>
+            <span className="sr-only">{t('controls.next')}</span>
           </Button>
         )
       )}
@@ -117,7 +119,7 @@ const TimerControls = ({
         className="bg-github-subtle border-github-subtle hover:bg-github-subtle/80"
       >
         <Maximize className="h-4 w-4" />
-        <span className="sr-only">Fullscreen</span>
+        <span className="sr-only">{t('controls.fullscreen')}</span>
       </Button>
 
       <Button
@@ -127,7 +129,7 @@ const TimerControls = ({
         className="bg-github-subtle border-github-subtle hover:bg-github-subtle/80"
       >
         <BarChart3 className="h-4 w-4" />
-        <span className="sr-only">Stats</span>
+        <span className="sr-only">{t('controls.stats')}</span>
       </Button>
       
       <div className="flex items-center gap-2 px-2 h-9 rounded-md border border-github-subtle bg-github-subtle/50">
@@ -142,7 +144,7 @@ const TimerControls = ({
           htmlFor="auto-advance-runtime"
           className="text-xs text-github-muted cursor-pointer select-none"
         >
-          Auto
+          {t('controls.auto')}
         </label>
       </div>
     </div>

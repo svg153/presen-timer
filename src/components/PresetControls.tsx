@@ -49,6 +49,7 @@ import {
   templateFromValue,
   templateValue
 } from '@/utils/templateUtils';
+import { useI18n } from '@/i18n';
 
 interface PresetControlsProps {
   // Sections the "Save" action will store (parsed textarea in the empty
@@ -66,13 +67,14 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
   const [presetName, setPresetName] = useState('');
   const [deleteName, setDeleteName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     setPresets(loadPresets());
   }, []);
 
   const activePreset = presets.find(p => isSameSections(p.sections, sections));
-  const activeTemplate = FACTORY_TEMPLATES.find(t => isSameSections(t.sections, sections));
+  const activeTemplate = FACTORY_TEMPLATES.find(tmpl => isSameSections(tmpl.sections, sections));
   const active = activePreset ?? activeTemplate;
   const canSave = sections.length > 0;
   const templateSelected = isTemplateValue(selected);
@@ -85,7 +87,7 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
     setSelected(name);
     setSaveOpen(false);
     setPresetName('');
-    toast.success(`Preset "${name}" saved`);
+    toast.success(t('presets.savedToast', { name }));
   };
 
   const handleLoad = (value: string) => {
@@ -93,13 +95,13 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
     const template = templateFromValue(value);
     if (template) {
       onLoad(template.sections.map(s => ({ ...s })));
-      toast.info(`Template "${template.name}" loaded`);
+      toast.info(t('presets.templateLoadedToast', { name: template.name }));
       return;
     }
     const preset = presets.find(p => p.name === value);
     if (preset) {
       onLoad(preset.sections.map(s => ({ ...s })));
-      toast.info(`Preset "${value}" loaded`);
+      toast.info(t('presets.presetLoadedToast', { name: value }));
     }
   };
 
@@ -107,14 +109,18 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
     if (!deleteName) return;
     setPresets(deletePreset(deleteName));
     if (selected === deleteName) setSelected('');
-    toast.success(`Preset "${deleteName}" deleted`);
+    toast.success(t('presets.deletedToast', { name: deleteName }));
     setDeleteName(null);
   };
 
   const handleExport = () => {
     if (presets.length === 0) return;
     downloadPresetsFile(presets);
-    toast.success(`Exported ${presets.length} preset${presets.length === 1 ? '' : 's'}`);
+    toast.success(
+      presets.length === 1
+        ? t('presets.exportedOneToast')
+        : t('presets.exportedManyToast', { count: presets.length })
+    );
   };
 
   const handleImportFile = async (file: File) => {
@@ -125,12 +131,14 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
       setPresets(merged);
       const newCount = imported.length - overwritten.length;
       if (overwritten.length > 0) {
-        toast.info(`Imported ${newCount} new, overwrote ${overwritten.length}`);
+        toast.info(t('presets.importedNewToast', { new: newCount, overwritten: overwritten.length }));
+      } else if (imported.length === 1) {
+        toast.success(t('presets.importedOneToast'));
       } else {
-        toast.success(`Imported ${imported.length} preset${imported.length === 1 ? '' : 's'}`);
+        toast.success(t('presets.importedManyToast', { count: imported.length }));
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Invalid preset file.');
+      toast.error(error instanceof Error ? error.message : t('presets.invalidFile'));
     }
   };
 
@@ -138,7 +146,7 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
     <div className={compact ? 'mt-4 pt-3 border-t border-github-subtle' : 'mb-4'}>
       {!compact && (
         <p className="text-sm text-github-muted mb-2">
-          Presets: save the current list or load a saved one
+          {t('presets.hint')}
         </p>
       )}
       <div className="flex items-center gap-2">
@@ -152,13 +160,13 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
           }}
         >
           <SelectTrigger className="flex-1 bg-github-dark border-github-subtle text-github-text">
-            <SelectValue placeholder="Load preset…" />
+            <SelectValue placeholder={t('presets.loadPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
             {presets.length > 0 && (
               <>
                 <SelectGroup>
-                  <SelectLabel>Your presets</SelectLabel>
+                  <SelectLabel>{t('presets.yourPresets')}</SelectLabel>
                   {presets.map(p => (
                     <SelectItem key={p.name} value={p.name}>
                       {p.name}
@@ -170,11 +178,11 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
               </>
             )}
             <SelectGroup>
-              <SelectLabel>Templates</SelectLabel>
-              {FACTORY_TEMPLATES.map(t => (
-                <SelectItem key={t.name} value={templateValue(t.name)}>
-                  {t.name}
-                  {isSameSections(t.sections, sections) ? ' ✓' : ''}
+              <SelectLabel>{t('presets.templates')}</SelectLabel>
+              {FACTORY_TEMPLATES.map(tmpl => (
+                <SelectItem key={tmpl.name} value={templateValue(tmpl.name)}>
+                  {tmpl.name}
+                  {isSameSections(tmpl.sections, sections) ? ' ✓' : ''}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -186,7 +194,7 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
           disabled={!canSave}
           onClick={() => setSaveOpen(true)}
         >
-          Save
+          {t('presets.save')}
         </Button>
         <Button
           variant="outline"
@@ -194,7 +202,7 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
           disabled={!selected || templateSelected}
           onClick={() => setDeleteName(selected)}
         >
-          Delete
+          {t('presets.delete')}
         </Button>
       </div>
       <div className="flex items-center gap-2 mt-2">
@@ -205,7 +213,7 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
           disabled={presets.length === 0}
           onClick={handleExport}
         >
-          Export all
+          {t('presets.exportAll')}
         </Button>
         <Button
           variant="ghost"
@@ -213,7 +221,7 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
           className="flex-1 text-github-muted"
           onClick={() => fileInputRef.current?.click()}
         >
-          Import
+          {t('presets.import')}
         </Button>
         <input
           ref={fileInputRef}
@@ -229,19 +237,21 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
       </div>
       {compact && active && (
         <p className="text-xs text-github-muted mt-1">
-          Active {activePreset ? 'preset' : 'template'}: {active.name} ({formatPresetSummary(active.sections)})
+          {activePreset
+            ? t('presets.activePreset', { name: active.name, summary: formatPresetSummary(active.sections) })
+            : t('presets.activeTemplate', { name: active.name, summary: formatPresetSummary(active.sections) })}
         </p>
       )}
 
       <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save preset</DialogTitle>
+            <DialogTitle>{t('presets.saveTitle')}</DialogTitle>
           </DialogHeader>
           <Input
             value={presetName}
             onChange={e => setPresetName(e.target.value)}
-            placeholder="Preset name"
+            placeholder={t('presets.namePlaceholder')}
             autoFocus
             onKeyDown={e => {
               if (e.key === 'Enter') handleSave();
@@ -249,15 +259,15 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
           />
           {presetName.trim() && presets.some(p => p.name === presetName.trim()) && (
             <p className="text-xs text-yellow-500">
-              A preset with this name exists and will be overwritten.
+              {t('presets.overwriteWarning')}
             </p>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setSaveOpen(false)}>
-              Cancel
+              {t('presets.cancel')}
             </Button>
             <Button disabled={!presetName.trim()} onClick={handleSave}>
-              Save
+              {t('presets.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -266,14 +276,14 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
       <AlertDialog open={!!deleteName} onOpenChange={open => !open && setDeleteName(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete preset "{deleteName}"?</AlertDialogTitle>
+            <AlertDialogTitle>{t('presets.deleteTitle', { name: deleteName ?? '' })}</AlertDialogTitle>
             <AlertDialogDescription>
-              This only removes the saved preset; the current sections are not affected.
+              {t('presets.deleteBody')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>{t('presets.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>{t('presets.deleteAction')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

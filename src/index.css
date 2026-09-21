@@ -5,6 +5,67 @@
 
 @layer base {
   :root {
+    /* Light theme (GitHub Primer light palette) */
+    --github-dark: 255 255 255;
+    --github-darker: 246 248 250;
+    --github-light: 31 35 40;
+    --github-purple: 130 80 223;
+    --github-green: 26 127 55;
+    --github-subtle: 223 227 232;
+    --github-text: 66 74 83;
+    --github-muted: 101 109 118;
+
+    --background: 0 0% 100%;
+    --foreground: 220 9% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 9% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 9% 15%;
+
+    --primary: 261 69% 59%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 26% 95%;
+    --secondary-foreground: 220 9% 15%;
+
+    --muted: 220 14% 93%;
+    --muted-foreground: 215 9% 43%;
+
+    --accent: 220 26% 92%;
+    --accent-foreground: 220 9% 15%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 85%;
+    --input: 220 13% 85%;
+    --ring: 261 69% 59%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 220 26% 96%;
+    --sidebar-foreground: 220 9% 15%;
+    --sidebar-primary: 261 69% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 26% 92%;
+    --sidebar-accent-foreground: 220 9% 15%;
+    --sidebar-border: 220 13% 85%;
+    --sidebar-ring: 261 69% 59%;
+  }
+
+  .dark {
+    /* Dark theme (GitHub Primer dark palette; the app's default look) */
+    --github-dark: 13 17 23;
+    --github-darker: 1 4 9;
+    --github-light: 255 255 255;
+    --github-purple: 137 87 229;
+    --github-green: 63 185 80;
+    --github-subtle: 33 38 45;
+    --github-text: 201 209 217;
+    --github-muted: 139 148 158;
+
     --background: 222 18% 12%;
     --foreground: 210 40% 98%;
 
@@ -32,8 +93,6 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 267 70% 50%;
-
-    --radius: 0.5rem;
 
     --sidebar-background: 222 15% 8%;
     --sidebar-foreground: 210 40% 98%;
@@ -86,14 +145,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d1117;
+  background: rgb(var(--github-darker));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #30363d;
+  background: rgb(var(--github-muted) / 0.4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8b949e;
+  background: rgb(var(--github-muted) / 0.7);
 }
