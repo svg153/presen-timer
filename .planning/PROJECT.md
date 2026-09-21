@@ -58,7 +58,9 @@ validado, no propuesta).
 - **Origen:** prueba de concepto de 2025, generada con Lovable (`gpt-engineer-app[bot]` como único autor).
   Se usó en una conferencia en Málaga.
 - **Estado:** repositorio **público**, sin secretos ni PII (auditado árbol de trabajo e historial completo).
-- **Antigüedad:** ~1 año. Las dependencias acumulan 53 avisos de Dependabot (22 altos, 27 moderados, 4 bajos).
+- **Antigüedad:** ~1 año. Las dependencias acumulaban 53 avisos de Dependabot (22 altos, 27 moderados, 4 bajos);
+  **resueltos**: `npm audit` está en **0** tras subir `vite@8`, `vitest@5`, `react-router-dom@7` y
+  `@vitejs/plugin-react-swc@4` (lo que hace **obligatorio Node ≥ 22**).
 - **Equipo:** un solo mantenedor (svg153).
 - **Idioma del código y de los artefactos:** inglés en el código, español en los documentos de planificación.
 
@@ -71,7 +73,7 @@ validado, no propuesta).
 - **El navegador no puede ser servidor MCP.** MCP es un protocolo cliente ↔ servidor; la pestaña es
   siempre la parte controlada.
 - **Sin framework de pruebas** en el punto de partida.
-- **`public/notification.mp3` es un placeholder de texto** (149 bytes): el aviso sonoro falla en silencio.
+- ~~**`public/notification.mp3` es un placeholder de texto** (149 bytes): el aviso sonoro falla en silencio.~~ **Resuelto:** ahora es `public/notification.wav` (22 350 bytes, CC0).
 
 ## Key Decisions
 

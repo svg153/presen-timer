@@ -8,10 +8,10 @@ Guía para agentes de IA (Copilot, Claude Code, Codex, Cursor...) que trabajan e
 
 ## Stack
 
-- **Build**: Vite 5 + TypeScript 5 (`tsconfig.app.json` tiene `strict: false` — ojo: sin `strictNullChecks` TypeScript **no** estrecha uniones discriminadas por un literal booleano)
+- **Build**: Vite 8 + TypeScript 5 (`tsconfig.app.json` tiene `strict: false` — ojo: sin `strictNullChecks` TypeScript **no** estrecha uniones discriminadas por un literal booleano)
 - **UI**: React 18 + shadcn/ui (Radix) + Tailwind CSS 3
-- **Routing**: react-router-dom 6
-- **Notificaciones**: sonner (toasts) + Web Audio (`/notification.mp3`)
+- **Routing**: react-router-dom 7
+- **Notificaciones**: sonner (toasts) + Web Audio (`/notification.wav`)
 - **Estado**: `useState`/hooks locales. **No hay estado global** (no Redux/Zustand) — no introducirlo sin necesidad.
 - **Gestor de paquetes**: npm (hay `bun.lockb` heredado de Lovable, ignóralo; usa `package-lock.json`)
 
@@ -20,14 +20,15 @@ Guía para agentes de IA (Copilot, Claude Code, Codex, Cursor...) que trabajan e
 ```bash
 npm install        # instalar dependencias
 npm run dev        # dev server (Vite)
-npm run build      # build de producción (valida TS + bundling)
+npm run typecheck  # tsc --noEmit sobre tsconfig.app.json y tsconfig.node.json
+npm run build      # build de producción (bundling; NO comprueba tipos)
 npm run lint       # ESLint
 npm run test       # Vitest (unitarios de src/ y mcp/)
 npm run test:e2e   # aceptación del puente MCP (necesita un navegador abierto)
 npm run mcp        # arranca el servidor MCP local (stdio + puente WebSocket)
 ```
 
-**Validación mínima antes de terminar cualquier cambio: `npm run lint && npm run build && npm run test`.** Los tests son Vitest (`vitest.config.ts`, entorno `node`) sobre `src/**/*.test.ts` y `mcp/**/*.test.mjs`. `npm run test:e2e` es la prueba de aceptación del puente MCP y necesita un navegador con la app abierta, por eso no corre en CI.
+**Validación mínima antes de terminar cualquier cambio: `npm run lint && npm run typecheck && npm run test && npm run build`.** Ojo: `npm run build` es `vite build` a secas, **no** comprueba tipos — para eso está `npm run typecheck`, que además es un paso obligatorio de CI (`.github/workflows/ci.yml`). Los tests son Vitest (`vitest.config.ts`, entorno `node`) sobre `src/**/*.test.ts` y `mcp/**/*.test.mjs`. `npm run test:e2e` es la prueba de aceptación del puente MCP y necesita un navegador con la app abierta, por eso no corre en CI.
 
 ## Mapa de arquitectura
 

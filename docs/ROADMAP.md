@@ -144,11 +144,42 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 - Controlar el timer desde el móvil (QR + WebRTC/BroadcastChannel o pequeño servidor).
 - **Postergada**: requiere decisión de arquitectura (¿sin servidor con BroadcastChannel?, ¿peerjs?, ¿backend?) que rompería los flujos actuales. Analizar cuando P0/P1 estén estables. Ticket de decisión: #18.
-- **Actualización**: el caso «un agente controla el timer» ya está resuelto — ver **13. Control remoto por MCP ✅**. Queda pendiente el caso «móvil como mando» (QR + WebRTC o `BroadcastChannel`), que puede reutilizar el mismo contrato de comandos de `shared/mcp-protocol.js` y la capa `src/mcp/commands.ts` sin tocar el resto de la app.
+- **Actualización**: el caso «un agente controla el timer» ya está resuelto — ver **14. Control remoto por MCP ✅**. Queda pendiente el caso «móvil como mando» (QR + WebRTC o `BroadcastChannel`), que puede reutilizar el mismo contrato de comandos de `shared/mcp-protocol.js` y la capa `src/mcp/commands.ts` sin tocar el resto de la app.
 
 ---
 
-### 13. Control remoto por MCP ✅
+## P3 — Extensibilidad
+
+### 13. Edición masiva de secciones ✅
+
+**Problema**: cargar un guion entero (plantilla o preset) es fácil, pero editarlo después obliga a ir sección a sección con el lápiz de cada fila. No hay forma de reescribir todo el guion de golpe.
+
+**Spec** (implementado):
+- Botón `ListChecks` (lucide, `ghost h-7 w-7`) a la **izquierda** del `+` de la cabecera de `SectionsList`; solo aparece si hay secciones.
+- Abre un `Dialog` con un `Textarea` monoespaciado con **todas las secciones en texto plano**, una por línea con el formato `Nombre: 5m` (también `1h`).
+- Vista previa en vivo: «Secciones detectadas: N · Total: hh:mm» o aviso de vacío, con el botón **Aplicar** deshabilitado si no se detecta ninguna sección.
+- Aviso explícito de que aplicar vuelve a la primera sección y detiene la cuenta atrás.
+- Reutiliza `sectionsToText` (`src/utils/presetUtils.ts`) y `parseSections` (`src/utils/timerUtils.ts`), las mismas funciones que ya usaban el textarea inicial y el import/export de presets.
+- i18n ES/EN: grupo `bulkEdit` en `src/i18n/en.ts` (canónico) y `es.ts`.
+
+**[AI-DECISION]** (issue maestro #4): se descartó el formato **JSON** que proponía la PR #20 — obliga a manejar llaves, comillas y `duration` en segundos, justo la fricción que este proyecto evita en su interfaz principal. Se usa el mismo `Nombre: 5m` que el usuario ya escribe al crear el guion, así que la edición masiva no introduce ningún formato nuevo que aprender.
+
+**Corrección de robustez**: `parseSections` partía por el **primer** `:` (`line.split(':')`), así que un nombre con dos puntos —`Demo: parte 2: 5m`— se interpretaba como nombre `"Demo"` y duración `"parte 2"` → `0` → **la sección desaparecía al pulsar Aplicar**. Ahora separa por el **último** `:` (`lastIndexOf`), de modo que el ida y vuelta `sectionsToText → parseSections` es estable para cualquier nombre.
+
+**Criterios de aceptación**:
+- [x] El botón de la cabecera abre el editor con las secciones actuales en texto plano.
+- [x] Editar y Aplicar reemplaza todas las secciones (timer parado, en la sección 1) y persiste en `localStorage`.
+- [x] Un nombre con dos puntos sobrevive al ida y vuelta (cubierto por pruebas y verificado en el navegador).
+- [x] Vista previa del recuento y del total en vivo; Aplicar deshabilitado si no hay secciones válidas.
+- [x] Textos traducidos ES/EN; `lint`, `typecheck`, `test` y `build` en verde.
+
+**Archivos**: `src/components/BulkEditDialog.tsx`, `src/components/SectionsList.tsx`, `src/utils/timerUtils.ts`, `src/utils/presetUtils.test.ts`, `src/i18n/{en,es}.ts`
+
+**Referencias**: issue #19 (`[P1-13] Edición masiva de secciones`), PR #20 (cerrada: proponía JSON).
+
+---
+
+### 14. Control remoto por MCP ✅
 
 **Problema**: no había forma de que un agente leyera el estado del timer ni de redefinir el guion sin tocar la UI a mano.
 
@@ -157,7 +188,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - Contrato compartido y sin dependencias en `shared/mcp-protocol.js`, única fuente de verdad de las 14 herramientas.
 - Capa de comandos independiente del transporte en `src/mcp/commands.ts`, con validación previa y errores en español.
 - Píldora de estado en la app con la configuración del cliente lista para copiar.
-- 60 pruebas unitarias y 23 de aceptación (`npm run test:e2e`).
+- 67 pruebas unitarias y 23 de aceptación (`npm run test:e2e`).
 
 **[AI-DECISION]** (issue maestro #4): se evaluaron tres opciones — (A) servidor MCP local por stdio + puente de bucle local, (B) MCP remoto alojado en Vercel, (C) WebMCP (`navigator.modelContext`). Se elige **A** porque no requiere cuenta, token, ni servicio alojado, y el estado sigue siendo efímero (vive solo mientras la pestaña está abierta). **B** y **C** quedan documentadas como fases posteriores en [`.planning/`](../.planning/) en lugar de descartarse. Restricción que condiciona todo: una página servida por HTTPS no puede abrir `ws://localhost` (contenido mixto, sin excepción en producción), así que el puente funciona desde `http://localhost` y GitHub Pages sigue siendo el despliegue estático.
 
@@ -168,7 +199,6 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - [x] El bundle de producción no incluye `ws` ni el SDK.
 
 **Archivos**: `shared/mcp-protocol.{js,d.ts}`, `mcp/server.mjs`, `mcp/e2e-driver.mjs`, `src/mcp/*`, `src/components/McpBridgeStatus.tsx`
-
 **Fases posteriores**: MCP remoto en Vercel (fase 02) y WebMCP (fase 03), documentadas en [`.planning/`](../.planning/).
 
 ---

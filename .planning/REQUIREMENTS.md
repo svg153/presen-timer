@@ -108,8 +108,8 @@ no por fase: una fase puede cubrir requisitos de varias categorías.
 | Autenticación en la v1 | El puente escucha solo en loopback |
 | Control remoto desde la web de GitHub Pages | Contenido mixto: HTTPS no puede hablar con `ws://localhost` |
 | Servidor MCP siempre activo | Contradice el requisito de ser efímero |
-| Sustituir `public/notification.mp3` | Requiere que el usuario aporte el audio real |
-| Actualizar las 55 dependencias vulnerables | Se ofrece como PR independiente |
+| ~~Sustituir `public/notification.mp3`~~ | ✅ Resuelto: `notification.wav` (CC0, `akx/Notifications`) |
+| ~~Actualizar las 55 dependencias vulnerables~~ | ✅ Resuelto: `npm audit` pasa de 23 a **0** |
 
 ---
 

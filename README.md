@@ -5,12 +5,18 @@ Temporizador para presentaciones con secciones cronometradas: define las seccion
 ## ✨ Funcionalidades
 
 - **Secciones cronometradas**: define una por línea con formato `Nombre: 5m` (minutos) o `2h` (horas)
+- **Edición en bloque**: reescribe todo el guion de una vez como texto plano `Nombre: 5m`, con vista previa en vivo del total
+- **Edición por sección**: renombrar, cambiar la duración, reordenar y eliminar desde la barra lateral
 - **Avance automático** entre secciones con notificación sonora
 - **Aviso visual** a 30 segundos del final de cada sección
+- **Tiempo extra (overtime)**: si te pasas, la cuenta sigue en negativo y el avance automático se puede desactivar
+- **Atajos de teclado** para controlar el timer sin tocar el ratón
+- **Presets**: guarda varios guiones con nombre, e impórtalos/expórtalos como JSON
+- **Estadísticas** de la presentación al terminar
+- **Modo presentador** a pantalla completa con fondo tipo semáforo
+- **PWA instalable** con Screen Wake Lock (la pantalla no se apaga)
+- **Tema claro/oscuro** e interfaz en **español e inglés**
 - **Barra de progreso** global de la presentación
-- **Sidebar** con la lista de secciones y navegación directa
-- **Tiempo extra**: añade minutos sobre la marcha
-- **Pantalla completa** para proyectar
 - **Persistencia**: tus secciones se guardan en el navegador
 - **Control remoto por MCP**: un agente puede leer el estado y redefinir el guion en vivo (opcional, en local)
 
@@ -30,15 +36,20 @@ Todo se ejecuta en el cliente: las secciones se guardan en `localStorage` y no s
 ```bash
 npm run build     # bundle de producción en dist/
 npm run preview   # sirve el bundle compilado
+npm run typecheck # tsc --noEmit (app + config de Vite)
 npm run lint      # eslint
 npm run test      # vitest (unitarios + integración del servidor MCP)
 ```
 
 `npm run test:e2e` maneja la app con un cliente MCP real y necesita una pestaña del navegador abierta — ver [Verificar el puente](#verificar-el-puente).
 
+> **Node ≥ 22 es obligatorio.** `vite@8` pide `^20.19.0 || >=22.12.0` y `vitest@5` pide `^22.12.0 || ^24.0.0 || >=26.0.0`.
+> Ojo: `npm run build` es `vite build` a secas y **no** comprueba tipos — para eso está `npm run typecheck`,
+> que la CI ejecuta en cada pull request junto con `lint` y `test`.
+
 ## 🛠️ Stack
 
-Vite 5 · React 18 · TypeScript · shadcn/ui · Tailwind CSS 3
+Vite 8 · React 18 · TypeScript 5 · react-router-dom 7 · shadcn/ui · Tailwind CSS 3
 
 ## Control remoto por MCP
 
@@ -131,3 +142,9 @@ El sitio se publica en GitHub Pages desde `.github/workflows/deploy-pages.yml` e
 ## 📄 Licencia
 
 MIT
+
+## 🎵 Créditos
+
+El aviso sonoro de fin de sección (`public/notification.wav`) procede de
+[`akx/Notifications`](https://github.com/akx/Notifications) (`WAV/Alarmed.wav`), publicado bajo
+**CC0 1.0 Universal (dominio público)**. No requiere atribución; este crédito es cortesía.

@@ -59,18 +59,21 @@ Ver la tabla de decisiones en `.planning/PROJECT.md` (D-01 … D-09).
 
 ### Deuda técnica conocida
 
-- `public/notification.mp3` es un placeholder de texto: el aviso sonoro falla en silencio.
-- 53 avisos abiertos de Dependabot (22 altos, 27 moderados, 4 bajos) repartidos en 17 paquetes
-  transitivos de desarrollo y build (`esbuild`, `vite`, `rollup`, `lodash`, `postcss`,
-  `brace-expansion`…). `npm audit` reporta 23 porque agrupa por aviso en el árbol resuelto,
-  mientras que Dependabot cuenta una alerta por cada par aviso/paquete afectado.
+- ~~`public/notification.mp3` es un placeholder de texto~~ — **resuelto**: ahora es `public/notification.wav`
+  (22 350 bytes, WAV PCM, CC0 vía [`akx/Notifications`](https://github.com/akx/Notifications)).
+- ~~53 avisos abiertos de Dependabot (22 altos, 27 moderados, 4 bajos) en 17 paquetes transitivos~~
+  — **resuelto**: `npm audit` pasó de **23 a 0**. El `npm update` + la subida a
+  `vite@8` / `vitest@5` / `react-router-dom@7` / `@vitejs/plugin-react-swc@4` eliminaron el árbol
+  vulnerable entero (`esbuild`, `vite`, `lodash`, `postcss`, `brace-expansion`…), no solo lo parchearon.
 - 7 avisos de ESLint preexistentes (`react-refresh/only-export-components`): seis en el scaffold
   de shadcn y uno en `src/i18n/index.tsx` (lo añadió la PR #17 en `main`). Los 3 errores que había
   antes los corrigió la PR #5 en `main`; esta fase no añade ni un aviso nuevo.
-- El typecheck no está en el pipeline: `"build": "vite build"` no ejecuta `tsc`, así que
-  `src/i18n/index.tsx` usaba `String.prototype.replaceAll` (ES2021) con `lib: ["ES2020", …]` y
-  `npx tsc --noEmit` fallaba con TS2550 sin que CI lo notara. Corregido subiendo `lib` a `ES2021`
-  al rebasar esta fase sobre `main`. Pendiente: añadir `tsc --noEmit` y `npm run test` a `ci.yml`.
+- ~~El typecheck no está en el pipeline~~ — **resuelto**: hay un script `npm run typecheck`
+  (`tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit`) y `ci.yml` lo ejecuta
+  junto con `npm run test`. De paso se corrigió el TS2550 que arrastraba `main`
+  (`src/i18n/index.tsx` usaba `replaceAll` con `lib: ["ES2020"]`; ahora `lib: ES2021`).
+- **Node ≥ 22 es obligatorio**: `vite@8` exige `^20.19.0 || >=22.12.0` y `vitest@5` exige
+  `^22.12.0 || ^24.0.0 || >=26.0.0`. `ci.yml` y `deploy-pages.yml` fijan ya `node-version: 22`.
 - Sin reducer puro: la lógica del temporizador vive dentro del hook y no es directamente testeable.
   La PR #6 ya extrajo `secondsLeftFromEnd` a `src/utils/timerUtils.ts` y esta fase la cubre con pruebas.
 - `eslint.config.js` solo cubre `**/*.{ts,tsx}`, así que `mcp/*.mjs` y `shared/*.js` no se lintan.
@@ -91,5 +94,6 @@ Ver la tabla de decisiones en `.planning/PROJECT.md` (D-01 … D-09).
   presentador, P2-9 estadísticas, P2-10 plantillas de fábrica, P2-11 i18n ES/EN + tema claro/oscuro
   y #18 (ticket de decisión del mando remoto). La PR #8 se rebasó sobre `976ed46`; los conflictos
   fueron solo en `docs/ROADMAP.md`, `package.json`, `package-lock.json` y `src/pages/Index.tsx`.
-- **Último hito:** fase 01 implementada y verificada end-to-end (23/23); 60 pruebas unitarias en verde.
+- **Último hito:** fase 01 implementada y verificada end-to-end (23/23); 67 pruebas unitarias en verde;
+  dependencias al día con `npm audit` en **0**; typecheck y tests ya en CI.
 - **Siguiente paso:** mergear la fase 01 y, cuando el usuario quiera, arrancar la fase 02.

@@ -31,10 +31,10 @@ controlarlo y **redefinir por completo la estructura de secciones** de una pesta
 - `timer_set_sections` cambia lo que se ve en la pestaña en menos de un segundo.
 - `timer_start` hace que el tiempo restante decrezca de verdad, y `timer_get_state` lo refleja.
 - Parar el servidor y volver a arrancarlo no requiere recargar la pestaña.
-- `npm run lint`, `npm run test` y `npm run build` pasan; el bundle no incluye `ws` ni el SDK de MCP.
+- `npm run lint`, `npm run typecheck`, `npm run test` y `npm run build` pasan; el bundle no incluye `ws` ni el SDK de MCP.
 - El despliegue de GitHub Pages sigue funcionando sin cambios.
 
-**Plans:** `01-01-PLAN.md` — **Estado: completada** (T1 … T8; 60 pruebas unitarias y 23/23 de aceptación en verde).
+**Plans:** `01-01-PLAN.md` — **Estado: completada** (T1 … T8; 67 pruebas unitarias y 23/23 de aceptación en verde).
 
 ---
 
@@ -93,8 +93,8 @@ alguno, para el caso de uso "el navegador me ayuda a preparar la charla".
 
 - Extraer el estado del temporizador a un reducer puro y cubrirlo con pruebas.
 - Sustituir las instantáneas de estado por un canal push (SSE o evento dirigido) para reducir tráfico.
-- Sustituir `public/notification.mp3` por audio real.
-- Actualizar las dependencias con avisos de Dependabot.
+- ~~Sustituir `public/notification.mp3` por audio real~~ — hecho: `public/notification.wav` (CC0).
+- ~~Actualizar las dependencias con avisos de Dependabot~~ — hecho: `npm audit` de 23 a **0**.
 - ~~Resolver los errores de ESLint preexistentes del scaffold de shadcn~~ — ya resuelto en `main` por la PR #5.
 
 **Plans:** pendiente

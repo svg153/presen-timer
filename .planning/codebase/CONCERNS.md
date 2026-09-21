@@ -2,17 +2,22 @@
 
 Riesgos, deudas y zonas frágiles conocidas en el punto de partida.
 
-## 1. `public/notification.mp3` no es audio
+## 1. ~~`public/notification.mp3` no es audio~~ — RESUELTO
 
-**Severidad:** media (funcional)
-**Evidencia:** el fichero pesa 149 bytes y su contenido es texto, no audio.
+**Severidad:** media (funcional) → **cerrado**
+**Evidencia:** el fichero pesaba 149 bytes y su contenido era texto, no audio.
 
-El aviso de fin de sección llama a `audioRef.current.play()`, que falla y se traga el error
-(`.catch(err => console.error(...))`). Resultado: **la sección termina en silencio y nadie se entera**.
+El aviso de fin de sección llama a `audioRef.current.play()`, que fallaba y se tragaba el error
+(`.catch(err => console.error(...))`). Resultado: **la sección terminaba en silencio y nadie se enteraba**.
 Es justo el fallo que un temporizador de presentaciones no debería tener.
 
-**Mitigación en la fase 01:** ninguna. Requiere que el usuario aporte un mp3 real.
-**Registrado en:** `README.md` y `.planning/ROADMAP.md` (fase 04).
+**Resolución:** se sustituyó por `public/notification.wav` (22 350 bytes, WAV PCM 44 100 Hz mono 16 bit,
+0,25 s), tomado de [`akx/Notifications`](https://github.com/akx/Notifications) (`WAV/Alarmed.wav`), publicado
+bajo **CC0 Public Domain** — sin obligación de atribución. Se eligió WAV frente a MP3/OGG porque lo decodifica
+cualquier navegador sin depender del códec y el coste de 22 KB es despreciable.
+Verificado en navegador: `canplaythrough` con `readyState = 4` y `play()` resuelto (antes: `NotSupportedError`).
+El formato va declarado en tres sitios que **deben cambiarse en bloque** si algún día se renombra:
+`src/hooks/useTimer.ts`, el `includeAssets` y el `workbox.globPatterns` de `vite.config.ts`.
 
 ## 2. Sin backend y sin canal de entrada
 
@@ -35,20 +40,29 @@ navegador ni directiva CSP que lo permita en producción. Alternativas: certific
 La web pública de GitHub Pages seguirá siendo una demo estática. Está documentado y la interfaz lo
 explicará en lugar de fallar en silencio.
 
-## 4. 53 avisos de Dependabot
+## 4. ~~53 avisos de Dependabot~~ — RESUELTO
 
-**Severidad:** baja en la práctica, alta en apariencia
+**Severidad:** baja en la práctica, alta en apariencia → **cerrado**
 
-22 altos, 27 moderados, 4 bajos, repartidos en 17 paquetes transitivos. Esperable en un proyecto de un
-año con un stack de 2025. El riesgo real de ejecución es bajo porque **no hay servidor**: todo corre en
-el navegador del usuario y el paquete es de código abierto, sin datos sensibles. Aun así, un
-repositorio público con 53 avisos proyecta mala imagen.
+Había 22 altos, 27 moderados y 4 bajos repartidos en 17 paquetes transitivos. Esperable en un proyecto
+de un año con un stack de 2025. El riesgo real de ejecución era bajo porque **no hay servidor**: todo
+corre en el navegador del usuario y el paquete es de código abierto, sin datos sensibles. Aun así, un
+repositorio público con 53 avisos proyectaba mala imagen.
 
-`npm audit` reporta 23 (13 altos, 7 moderados, 3 bajos) sobre 863 dependencias, porque agrupa por
-aviso mientras que Dependabot cuenta una alerta por cada par aviso/paquete afectado.
+**Resolución:** `npm audit` pasó de **23 a 0**. El árbol vulnerable entero desapareció, no se parcheó:
+`npm update` podó 72 paquetes y la subida de los majors acotados terminó el trabajo —
+`vite@5.4.10 → 8.3.0`, `vitest@3.2.7 → 5.0.1`, `react-router-dom@6.30.6 → 7.18.4`,
+`@vitejs/plugin-react-swc@3.11.0 → 4.3.3`. Verificado con `npm audit --json`: `total: 0` sobre 836
+dependencias (antes 863).
 
-**Mitigación:** ofrecido como PR independiente. No forma parte de la fase 01 para no mezclar un
-`npm audit fix --force` (que rompe versiones mayores) con una funcionalidad nueva.
+**Los majors que se dejaron fuera a propósito** (riesgo alto, sin aviso de seguridad que los exija):
+React 19, `@types/react` 19, Tailwind 4 (reescritura CSS-first que rompería `tailwind.config.ts` y
+shadcn), TypeScript 7 (reescritura en Go), ESLint 10, `recharts` 3, `sonner` 2, `vaul` 1,
+`tailwind-merge` 3, `date-fns` 4, `next-themes` 0.4, `lucide-react` 1.
+
+**Requisito derivado:** `vite@8` exige Node `^20.19.0 || >=22.12.0` y `vitest@5` exige
+`^22.12.0 || ^24.0.0 || >=26.0.0`, así que **Node 22 pasa a ser obligatorio** en `ci.yml` y
+`deploy-pages.yml`.
 
 ## 5. Avisos de ESLint preexistentes
 
@@ -66,12 +80,12 @@ la fase 01 no tuvo que tocarlos.
 **Riesgo colateral:** como `npm run lint` no sale completamente limpio, es fácil colar avisos nuevos
 sin darse cuenta. La fase 01 **compara contra el baseline** y no añade ninguno.
 
-## 6. El typecheck no está en el pipeline y estaba roto
+## 6. ~~El typecheck no está en el pipeline y estaba roto~~ — RESUELTO
 
-**Severidad:** media
+**Severidad:** media → **cerrado**
 
 `package.json` define `"build": "vite build"`, **sin `tsc`**. esbuild borra los tipos sin
-comprobarlos, así que `.github/workflows/ci.yml` (que solo corre `lint` + `build`) puede salir en
+comprobarlos, así que `.github/workflows/ci.yml` (que solo corría `lint` + `build`) podía salir en
 verde con el proyecto sin typechequear.
 
 Y de hecho estaba roto: `src/i18n/index.tsx` (PR #17) usa `String.prototype.replaceAll`, que es
@@ -82,11 +96,17 @@ Resultado: `npx tsc -p tsconfig.app.json --noEmit` fallaba con
 src/i18n/index.tsx(59,23): error TS2550: Property 'replaceAll' does not exist on type 'string'.
 ```
 
-**Mitigación:** se subió `lib` a `ES2021` (cambio puramente aditivo; `target` sigue en `ES2020`, así
-que la sintaxis emitida no cambia). Se detectó al rebasar la PR #8 sobre `main`.
+**Resolución (dos partes):**
+1. Se subió `lib` a `ES2021` (cambio puramente aditivo; `target` sigue en `ES2020`, así que la
+   sintaxis emitida no cambia).
+2. Se cerró la brecha de proceso: nuevo script `npm run typecheck`
+   (`tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit`) y **`ci.yml` ahora
+   ejecuta Typecheck y Test** entre Lint y Build. De paso se subió el workflow a
+   `actions/checkout@v5` / `actions/setup-node@v5` con **Node 22** (obligatorio para `vite@8`).
 
-**Deuda pendiente:** añadir `tsc --noEmit` (y `npm run test`) a `.github/workflows/ci.yml`, que
-además sigue en `actions/checkout@v4` / `actions/setup-node@v4` con Node 20.
+⚠️ `npx tsc -p tsconfig.json` **no** sirve como comprobación: es un proyecto solución (`files: []`),
+así que hay que apuntar a `tsconfig.app.json` y `tsconfig.node.json` por separado — que es justo lo
+que hace el script.
 
 ## 7. La lógica del temporizador no es testeable de forma aislada
 
@@ -100,29 +120,30 @@ avance automático seguirá siendo invisible para las pruebas unitarias.
 
 **Registrado en:** fase 04 (extraer un reducer puro).
 
-## 7. Doble fichero de bloqueo
+## 8. Doble fichero de bloqueo
 
 **Severidad:** baja
 
 Conviven `package-lock.json` (npm) y `bun.lockb`. La CI usa `npm ci`. Si alguien instala con Bun, los
 dos pueden divergir. La fase 01 añade dependencias, así que debe actualizar **`package-lock.json`**.
 
-## 8. Dependencias del scaffold sin usar
+## 9. Dependencias del scaffold sin usar
 
 **Severidad:** baja
 
 `recharts`, `embla-carousel-react`, `input-otp`, `react-day-picker`, `vaul`, `cmdk`, `next-themes`,
 `@tanstack/react-query`… no se usan. Inflan la instalación y la superficie de avisos de seguridad.
-No se limpian en la fase 01 para no ampliar el alcance.
+No se limpian en la fase 01 para no ampliar el alcance. (Nota: el `npm update` de la limpieza de
+dependencias ya podó 72 paquetes, muchos de ellos de este grupo.)
 
-## 9. `requestFullscreen()` exige gesto de usuario
+## 10. `requestFullscreen()` exige gesto de usuario
 
 **Severidad:** media (limita la funcionalidad remota)
 
 No se puede activar la pantalla completa desde un agente. Por eso `timer_toggle_fullscreen` **no** se
 expone como herramienta MCP: una herramienta que siempre falla es peor que su ausencia.
 
-## 10. Instalación de dependencias de servidor en un proyecto estático
+## 11. Instalación de dependencias de servidor en un proyecto estático
 
 **Severidad:** baja
 

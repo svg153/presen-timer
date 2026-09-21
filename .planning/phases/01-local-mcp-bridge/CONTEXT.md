@@ -89,6 +89,6 @@ Detalle completo en `.planning/PROJECT.md` (tabla D-01…D-09).
 | Endpoint MCP remoto por HTTPS en Vercel | 02 |
 | Emparejamiento con token efímero y estado compartido (Upstash) | 02 |
 | Herramientas registradas vía WebMCP | 03 |
-| Aviso sonoro real (`notification.mp3`) | 04 |
+| Aviso sonoro real | ✅ resuelto (`notification.wav`, CC0) |
 | Reducer puro y pruebas del bucle de cuenta atrás | 04 |
 | Control de la pantalla completa desde el agente | No previsto (D-09) |

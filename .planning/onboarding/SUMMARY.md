@@ -38,7 +38,8 @@ npm run mcp          # servidor MCP + puente WebSocket (fase 01)
 npm run test         # pruebas (fase 01)
 npm run test:e2e     # aceptación MCP; requiere navegador abierto (fase 01)
 npm run lint         # ESLint (0 errores, 7 avisos heredados)
-npm run build        # build de producción
+npm run typecheck    # tsc sobre tsconfig.app.json y tsconfig.node.json
+npm run build        # build de producción (empaqueta; NO comprueba tipos)
 ```
 
 ## Cómo se usa el control remoto (fase 01)
@@ -76,8 +77,10 @@ Conviene hacerlo en un commit propio, para que el ruido quede aislado y sea revi
 
 ## Deudas conocidas
 
-- `public/notification.mp3` es un placeholder de texto: el aviso sonoro no suena.
-- 53 avisos de Dependabot (22 altos, 27 moderados, 4 bajos) en 17 paquetes transitivos.
+- `public/notification.wav` es el aviso sonoro real (CC0): el aviso de fin de sección ya suena.
+- ~~53 avisos de Dependabot (22 altos, 27 moderados, 4 bajos) en 17 paquetes transitivos~~ — **resuelto**:
+  `npm audit` pasó de 23 a **0** subiendo `vite@8`, `vitest@5`, `react-router-dom@7` y
+  `@vitejs/plugin-react-swc@4`. **Node ≥ 22 es obligatorio** desde entonces.
 - 7 avisos de ESLint heredados (6 del scaffold de shadcn + 1 de `src/i18n/index.tsx`); 0 errores.
 - La lógica del temporizador sigue viviendo dentro del hook, sin reducer puro. La PR #6 ya extrajo
   `secondsLeftFromEnd` a `src/utils/timerUtils.ts` y esta fase la cubre con pruebas.

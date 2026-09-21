@@ -63,7 +63,7 @@ interface TimerState {
 
 Todos los activos pasan por `import.meta.env.BASE_URL`:
 
-- `src/hooks/useTimer.ts` → `new Audio(`${BASE_URL}notification.mp3`)`
+- `src/hooks/useTimer.ts` → `new Audio(`${BASE_URL}notification.wav`)`
 - `index.html` → `%BASE_URL%favicon.ico`, `%BASE_URL%og-image.png`
 
 ## Limitaciones estructurales relevantes para la fase 01

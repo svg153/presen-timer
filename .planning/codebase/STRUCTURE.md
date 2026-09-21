@@ -7,7 +7,7 @@ presen-timer/
 ├─ .planning/                        # artefactos GSD (este árbol)
 ├─ public/
 │  ├─ favicon.ico
-│  ├─ notification.mp3               # placeholder de texto (149 bytes) — ver CONCERNS
+│  ├─ notification.wav               # aviso sonoro real (CC0, akx/Notifications)
 │  ├─ og-image.png
 │  └─ placeholder.svg
 ├─ src/
