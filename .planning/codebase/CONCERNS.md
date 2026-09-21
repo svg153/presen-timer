@@ -35,14 +35,17 @@ navegador ni directiva CSP que lo permita en producción. Alternativas: certific
 La web pública de GitHub Pages seguirá siendo una demo estática. Está documentado y la interfaz lo
 explicará en lugar de fallar en silencio.
 
-## 4. 55 avisos de Dependabot
+## 4. 53 avisos de Dependabot
 
 **Severidad:** baja en la práctica, alta en apariencia
 
-24 altos, 27 moderados, 4 bajos. Esperable en un proyecto de un año con un stack de 2025.
-El riesgo real de ejecución es bajo porque **no hay servidor**: todo corre en el navegador del usuario
-y el paquete es de código abierto, sin datos sensibles. Aun así, un repositorio público con 55 avisos
-proyecta mala imagen.
+22 altos, 27 moderados, 4 bajos, repartidos en 17 paquetes transitivos. Esperable en un proyecto de un
+año con un stack de 2025. El riesgo real de ejecución es bajo porque **no hay servidor**: todo corre en
+el navegador del usuario y el paquete es de código abierto, sin datos sensibles. Aun así, un
+repositorio público con 53 avisos proyecta mala imagen.
+
+`npm audit` reporta 23 (13 altos, 7 moderados, 3 bajos) sobre 863 dependencias, porque agrupa por
+aviso mientras que Dependabot cuenta una alerta por cada par aviso/paquete afectado.
 
 **Mitigación:** ofrecido como PR independiente. No forma parte de la fase 01 para no mezclar un
 `npm audit fix --force` (que rompe versiones mayores) con una funcionalidad nueva.

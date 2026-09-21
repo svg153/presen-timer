@@ -77,7 +77,7 @@ Conviene hacerlo en un commit propio, para que el ruido quede aislado y sea revi
 ## Deudas conocidas
 
 - `public/notification.mp3` es un placeholder de texto: el aviso sonoro no suena.
-- 55 avisos de Dependabot (24 altos, 27 moderados, 4 bajos).
+- 53 avisos de Dependabot (22 altos, 27 moderados, 4 bajos) en 17 paquetes transitivos.
 - 7 avisos de ESLint heredados (6 del scaffold de shadcn + 1 de `src/i18n/index.tsx`); 0 errores.
 - La lógica del temporizador sigue viviendo dentro del hook, sin reducer puro. La PR #6 ya extrajo
   `secondsLeftFromEnd` a `src/utils/timerUtils.ts` y esta fase la cubre con pruebas.

@@ -58,7 +58,7 @@ validado, no propuesta).
 - **Origen:** prueba de concepto de 2025, generada con Lovable (`gpt-engineer-app[bot]` como único autor).
   Se usó en una conferencia en Málaga.
 - **Estado:** repositorio **público**, sin secretos ni PII (auditado árbol de trabajo e historial completo).
-- **Antigüedad:** ~1 año. Las dependencias acumulan 55 avisos de Dependabot (24 altos, 27 moderados, 4 bajos).
+- **Antigüedad:** ~1 año. Las dependencias acumulan 53 avisos de Dependabot (22 altos, 27 moderados, 4 bajos).
 - **Equipo:** un solo mantenedor (svg153).
 - **Idioma del código y de los artefactos:** inglés en el código, español en los documentos de planificación.
 

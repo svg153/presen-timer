@@ -60,9 +60,9 @@ Ver la tabla de decisiones en `.planning/PROJECT.md` (D-01 … D-09).
 ### Deuda técnica conocida
 
 - `public/notification.mp3` es un placeholder de texto: el aviso sonoro falla en silencio.
-- 55 avisos abiertos de Dependabot (24 altos, 27 moderados, 4 bajos) repartidos en 19 paquetes
+- 53 avisos abiertos de Dependabot (22 altos, 27 moderados, 4 bajos) repartidos en 17 paquetes
   transitivos de desarrollo y build (`esbuild`, `vite`, `rollup`, `lodash`, `postcss`,
-  `brace-expansion`…). `npm audit` reporta 25 porque cuenta avisos únicos en el árbol resuelto,
+  `brace-expansion`…). `npm audit` reporta 23 porque agrupa por aviso en el árbol resuelto,
   mientras que Dependabot cuenta una alerta por cada par aviso/paquete afectado.
 - 7 avisos de ESLint preexistentes (`react-refresh/only-export-components`): seis en el scaffold
   de shadcn y uno en `src/i18n/index.tsx` (lo añadió la PR #17 en `main`). Los 3 errores que había
