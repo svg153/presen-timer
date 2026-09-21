@@ -1,69 +1,59 @@
-# Welcome to your Lovable project
+# PresenTimer
 
-## Project info
+A minimalist presentation timer with section management, built as a proof of concept for a talk.
 
-**URL**: https://lovable.dev/projects/a2503c36-b435-4f92-800e-21fd05c223ed
+Define your agenda as `Section: duration` lines, then run the timer with a progress bar,
+per-section countdown, a 30-second warning state, extra-time buttons and fullscreen mode.
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/a2503c36-b435-4f92-800e-21fd05c223ed) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
+## Tech stack
 
 - Vite
 - TypeScript
 - React
-- shadcn-ui
+- shadcn-ui + Radix UI
 - Tailwind CSS
 
-## How can I deploy this project?
+Everything runs client-side: sections are kept in `localStorage` and nothing is sent to a server.
 
-Simply open [Lovable](https://lovable.dev/projects/a2503c36-b435-4f92-800e-21fd05c223ed) and click on Share -> Publish.
+## Getting started
 
-## I want to use a custom domain - is that possible?
+```sh
+npm install
+npm run dev
+```
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+The dev server listens on http://localhost:8080/presen-timer/.
+
+## Build
+
+```sh
+npm run build     # production bundle in dist/
+npm run preview   # serve the built bundle locally
+npm run lint      # eslint
+```
+
+### Base path
+
+`vite.config.ts` defaults to a base path of `/presen-timer/`, which matches the GitHub Pages
+project site at `https://svg153.github.io/presen-timer/`. Override it when hosting elsewhere:
+
+```sh
+VITE_BASE_PATH=/ npm run build          # custom domain or user/org page
+VITE_BASE_PATH=/some-path/ npm run build
+```
+
+## Deployment
+
+Pushes to `main` trigger `.github/workflows/deploy-pages.yml`, which builds the site and publishes
+it to GitHub Pages. The workflow derives the base path from the repository name and copies
+`index.html` to `404.html` so client-side routes resolve correctly.
+
+One-time setup: in the repository settings, set **Pages → Build and deployment → Source** to
+**GitHub Actions**.
+
+## Notes
+
+- `public/notification.mp3` is still a placeholder text file from the original scaffold, so the
+  end-of-section chime does not play. The app handles the failure silently. Drop a real MP3 with
+  that name into `public/` to enable it.
+- The `lovable-tagger` dev dependency only activates during `npm run dev`.
