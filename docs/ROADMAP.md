@@ -105,7 +105,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - Validar el JSON importado (nombre string, duración number > 0); error visible con toast si es inválido.
 - **Criterios**: round-trip export→import idéntico; JSON inválido muestra error y no rompe el estado.
 
-### 7. PWA + Wake Lock 📋
+### 7. PWA + Wake Lock ✅
 
 - Convertir en PWA instalable: manifest + service worker (preferir `vite-plugin-pwa`).
 - **Screen Wake Lock API** activa mientras el timer corre (`navigator.wakeLock.request('screen')`), liberar al pausar/terminar; reintentar al volver la visibilidad.
