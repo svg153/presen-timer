@@ -119,6 +119,28 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - **Criterios**: fullscreen real; colores cambian en los umbrales; legible a distancia (texto ≥ 20vh).
 - Implementado en #14: overlay `PresenterView`, umbrales persistidos en localStorage, `isFullscreen` sincronizado con evento `fullscreenchange`.
 
+### 13. Edición masiva de secciones (JSON) ✅
+
+**Problema**: tras cargar presets/plantillas, ajustar varias secciones obliga a editarlas una a una con el lápiz de cada fila.
+
+**Spec**:
+- Botón lápiz en la cabecera del sidebar de secciones, a la izquierda del `+`, con el mismo estilo que el lápiz de cada sección.
+- Abre un diálogo con **todas las secciones como array JSON** `[{ "name": "...", "duration": segundos }]`, autopuesto con las secciones actuales (p. ej. tras cargar una plantilla).
+- Copiar/pegar/editar el JSON y "Apply" reemplaza todas las secciones de golpe (vía `setSections`: vuelve a la sección 1 y detiene el timer, como al cargar un preset).
+- Validación pura en `src/utils/sectionsEditUtils.ts` (`sectionsToJson` / `parseSectionsJson`): array de objetos con `name` string no vacío y `duration` número entero > 0; JSON inválido → toast de error y estado intacto.
+- Textos de UI en i18n ES/EN (claves `sections.bulk*`).
+
+**Criterios de aceptación**:
+- [x] El lápiz de la cabecera abre el editor con el JSON de las secciones actuales.
+- [x] Pegar un JSON válido y aplicar reemplaza todas las secciones en dos clics.
+- [x] JSON inválido o estructura incorrecta → error visible, secciones sin tocar.
+- [x] Flujo plantilla → lápiz → editar JSON → aplicar funciona end-to-end.
+- [x] `npm run lint && npm run build` en verde.
+
+**Archivos**: `src/components/SectionsList.tsx`, `src/components/SectionsBulkEditDialog.tsx` (nuevo), `src/utils/sectionsEditUtils.ts` (nuevo), `src/i18n/en.ts`, `src/i18n/es.ts`
+
+- Implementado en #19: lápiz en la cabecera del sidebar (junto al `+`) que abre `SectionsBulkEditDialog` con el array JSON autopuesto; `parseSectionsJson` valida y lanza errores de usuario en inglés (misma convención que import/export de presets); "Aplicar" usa `setSections` (mismos efectos que cargar un preset).
+
 ---
 
 ## P2 — Diferenciación
