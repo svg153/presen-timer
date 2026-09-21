@@ -20,7 +20,10 @@ const isTypingTarget = (target: EventTarget | null): boolean => {
     target.tagName === 'INPUT' ||
     target.tagName === 'TEXTAREA' ||
     target.tagName === 'SELECT' ||
-    target.isContentEditable
+    target.isContentEditable ||
+    // Slider thumbs consume arrow keys themselves (e.g. presenter
+    // threshold sliders); global shortcuts must not fire.
+    target.getAttribute('role') === 'slider'
   );
 };
 
