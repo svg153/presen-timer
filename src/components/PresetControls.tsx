@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -32,8 +32,14 @@ import {
   formatPresetSummary,
   isSameSections,
   loadPresets,
+  savePresets,
   savePreset
 } from '@/utils/presetUtils';
+import {
+  downloadPresetsFile,
+  mergePresets,
+  parseImportedPresets
+} from '@/utils/importExportUtils';
 
 interface PresetControlsProps {
   // Sections the "Save" action will store (parsed textarea in the empty
@@ -50,6 +56,7 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
   const [saveOpen, setSaveOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [deleteName, setDeleteName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setPresets(loadPresets());
@@ -84,6 +91,29 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
     if (selected === deleteName) setSelected('');
     toast.success(`Preset "${deleteName}" deleted`);
     setDeleteName(null);
+  };
+
+  const handleExport = () => {
+    if (presets.length === 0) return;
+    downloadPresetsFile(presets);
+    toast.success(`Exported ${presets.length} preset${presets.length === 1 ? '' : 's'}`);
+  };
+
+  const handleImportFile = async (file: File) => {
+    try {
+      const imported = parseImportedPresets(await file.text());
+      const { merged, overwritten } = mergePresets(imported, loadPresets());
+      savePresets(merged);
+      setPresets(merged);
+      const newCount = imported.length - overwritten.length;
+      if (overwritten.length > 0) {
+        toast.info(`Imported ${newCount} new, overwrote ${overwritten.length}`);
+      } else {
+        toast.success(`Imported ${imported.length} preset${imported.length === 1 ? '' : 's'}`);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Invalid preset file.');
+    }
   };
 
   return (
@@ -131,6 +161,36 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
         >
           Delete
         </Button>
+      </div>
+      <div className="flex items-center gap-2 mt-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex-1 text-github-muted"
+          disabled={presets.length === 0}
+          onClick={handleExport}
+        >
+          Export all
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex-1 text-github-muted"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Import
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={e => {
+            const file = e.target.files?.[0];
+            if (file) handleImportFile(file);
+            e.target.value = '';
+          }}
+        />
       </div>
       {compact && activePreset && (
         <p className="text-xs text-github-muted mt-1">

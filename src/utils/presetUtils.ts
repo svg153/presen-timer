@@ -7,7 +7,7 @@ export interface Preset {
 
 export const PRESETS_STORAGE_KEY = 'presentation-timer-presets';
 
-const isValidPreset = (value: unknown): value is Preset => {
+export const isValidPreset = (value: unknown): value is Preset => {
   if (typeof value !== 'object' || value === null) return false;
   const p = value as Preset;
   if (typeof p.name !== 'string' || !p.name.trim()) return false;
