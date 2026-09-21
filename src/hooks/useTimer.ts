@@ -13,8 +13,10 @@ interface TimerState {
   timeRemaining: number;
   isRunning: boolean;
   isWarning: boolean;
+  isOvertime: boolean;
   isFullscreen: boolean;
   isSidebarOpen: boolean;
+  autoAdvance: boolean;
 }
 
 const WARNING_THRESHOLD = 30;
@@ -26,8 +28,10 @@ const useTimer = () => {
     timeRemaining: 0,
     isRunning: false,
     isWarning: false,
+    isOvertime: false,
     isFullscreen: false,
-    isSidebarOpen: true
+    isSidebarOpen: true,
+    autoAdvance: true
   });
 
   // Mirror of state for imperative reads (interval callbacks, actions)
@@ -73,22 +77,23 @@ const useTimer = () => {
         const secondsLeft = secondsLeftFromEnd(endAt, Date.now());
         const prev = stateRef.current;
 
-        // Avoid re-renders while the displayed second hasn't changed
-        if (secondsLeft === prev.timeRemaining && secondsLeft > 0) return;
-
         if (secondsLeft > 0) {
+          // Avoid re-renders while the displayed second hasn't changed
+          if (secondsLeft === prev.timeRemaining) return;
+
           setState({
             ...prev,
             timeRemaining: secondsLeft,
-            isWarning: secondsLeft <= WARNING_THRESHOLD
+            isWarning: secondsLeft <= WARNING_THRESHOLD,
+            isOvertime: false
           });
           return;
         }
 
-        // Section finished
-        playNotification();
+        // Section time is up
+        if (prev.autoAdvance && prev.currentSectionIndex < prev.sections.length - 1) {
+          playNotification();
 
-        if (prev.currentSectionIndex < prev.sections.length - 1) {
           const nextIndex = prev.currentSectionIndex + 1;
           const nextDuration = prev.sections[nextIndex].duration;
 
@@ -103,16 +108,34 @@ const useTimer = () => {
             ...prev,
             currentSectionIndex: nextIndex,
             timeRemaining: nextDuration,
-            isWarning: nextDuration <= WARNING_THRESHOLD
+            isWarning: nextDuration <= WARNING_THRESHOLD,
+            isOvertime: false
           });
-        } else {
+        } else if (prev.autoAdvance) {
           // End of presentation
+          playNotification();
           endAtRef.current = null;
           setState({
             ...prev,
             timeRemaining: 0,
             isRunning: false,
-            isWarning: false
+            isWarning: false,
+            isOvertime: false
+          });
+        } else {
+          // Overtime: keep counting down into negative so the speaker
+          // can see how much they have overrun; advance manually.
+          // Derived from the original end timestamp so the cadence stays 1s/s.
+          const overtimeSeconds = Math.floor((Date.now() - endAt) / 1000);
+          const displayed = -overtimeSeconds;
+          if (displayed === prev.timeRemaining) return;
+
+          if (prev.timeRemaining >= 0) playNotification();
+
+          setState({
+            ...prev,
+            timeRemaining: displayed,
+            isOvertime: true
           });
         }
       }, 250);
@@ -140,7 +163,8 @@ const useTimer = () => {
       currentSectionIndex: 0,
       timeRemaining: newSections.length > 0 ? newSections[0].duration : 0,
       isRunning: false,
-      isWarning: false
+      isWarning: false,
+      isOvertime: false
     }));
   }, []);
   
@@ -150,9 +174,12 @@ const useTimer = () => {
     if (prev.sections.length === 0) return;
 
     if (prev.isRunning) {
-      // Pause: freeze the remaining time from the end timestamp
+      // Pause: freeze the remaining time from the end timestamp.
+      // In overtime this keeps the negative value so the overrun is preserved.
       const endAt = endAtRef.current;
-      const remaining = endAt !== null ? secondsLeftFromEnd(endAt, Date.now()) : prev.timeRemaining;
+      const remaining = endAt !== null
+        ? Math.floor((endAt - Date.now()) / 1000)
+        : prev.timeRemaining;
       endAtRef.current = null;
       setState({
         ...prev,
@@ -180,7 +207,8 @@ const useTimer = () => {
       ...prev,
       timeRemaining: prev.sections[prev.currentSectionIndex].duration,
       isRunning: false,
-      isWarning: false
+      isWarning: false,
+      isOvertime: false
     });
   }, []);
   
@@ -201,7 +229,8 @@ const useTimer = () => {
       ...prev,
       currentSectionIndex: newIndex,
       timeRemaining: newDuration,
-      isWarning: false
+      isWarning: false,
+      isOvertime: false
     });
   }, [playNotification]);
   
@@ -221,7 +250,8 @@ const useTimer = () => {
       ...prev,
       currentSectionIndex: newIndex,
       timeRemaining: newDuration,
-      isWarning: false
+      isWarning: false,
+      isOvertime: false
     });
   }, []);
   
@@ -236,6 +266,7 @@ const useTimer = () => {
       currentSectionIndex: index,
       timeRemaining: prev.sections[index].duration,
       isWarning: false,
+      isOvertime: false,
       isRunning: false
     });
   }, []);
@@ -249,7 +280,8 @@ const useTimer = () => {
 
     setState(p => ({
       ...p,
-      timeRemaining: p.timeRemaining + seconds
+      timeRemaining: p.timeRemaining + seconds,
+      isOvertime: p.timeRemaining + seconds >= 0 ? false : p.isOvertime
     }));
     
     toast({
@@ -285,6 +317,14 @@ const useTimer = () => {
     }));
   }, []);
   
+  // Toggle auto-advance on section end
+  const setAutoAdvance = useCallback((enabled: boolean) => {
+    setState(prev => ({
+      ...prev,
+      autoAdvance: enabled
+    }));
+  }, []);
+  
   // End presentation
   const endPresentation = useCallback(() => {
     endAtRef.current = null;
@@ -310,6 +350,7 @@ const useTimer = () => {
     addExtraTime,
     toggleFullscreen,
     toggleSidebar,
+    setAutoAdvance,
     endPresentation
   };
 };

@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { parseSections } from '@/utils/timerUtils';
 import { TimerSection } from '@/hooks/useTimer';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,9 +8,11 @@ import { Card } from '@/components/ui/card';
 
 interface SectionInputProps {
   onSetSections: (sections: TimerSection[]) => void;
+  autoAdvance: boolean;
+  onSetAutoAdvance: (enabled: boolean) => void;
 }
 
-const SectionInput = ({ onSetSections }: SectionInputProps) => {
+const SectionInput = ({ onSetSections, autoAdvance, onSetAutoAdvance }: SectionInputProps) => {
   const [inputText, setInputText] = useState(
     `Introducción: 3m\nExplicación: 5m\nDemo: 10m\nPreguntas: 2m`
   );
@@ -36,6 +38,17 @@ const SectionInput = ({ onSetSections }: SectionInputProps) => {
         className="mb-4 bg-github-dark border-github-subtle text-github-text"
         placeholder="Intro: 5m&#10;Main content: 15m&#10;Demo: 10m&#10;Q&A: 5m"
       />
+      
+      <div className="flex items-center justify-between mb-4">
+        <label htmlFor="auto-advance" className="text-sm text-github-muted cursor-pointer">
+          Auto-advance to next section when time runs out
+        </label>
+        <Switch
+          id="auto-advance"
+          checked={autoAdvance}
+          onCheckedChange={onSetAutoAdvance}
+        />
+      </div>
       
       <Button 
         onClick={handleCreateSections}

@@ -27,7 +27,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 ---
 
-### 2. Tiempo extra / cuenta negativa 📋
+### 2. Tiempo extra / cuenta negativa ✅
 
 **Problema**: al agotarse una sección salta automáticamente a la siguiente. En charlas reales, el ponente necesita ver cuánto se ha pasado.
 

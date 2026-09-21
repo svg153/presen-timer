@@ -42,19 +42,20 @@ export const parseSections = (text: string): { name: string; duration: number }[
     );
 };
 
-// Format seconds as MM:SS or HH:MM:SS
+// Format seconds as MM:SS or HH:MM:SS; negative values render as -MM:SS
 export const formatTime = (seconds: number): string => {
-  if (seconds < 0) seconds = 0;
+  const sign = seconds < 0 ? '-' : '';
+  const abs = Math.abs(seconds);
   
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+  const hours = Math.floor(abs / 3600);
+  const minutes = Math.floor((abs % 3600) / 60);
+  const secs = abs % 60;
   
   if (hours > 0) {
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
   
-  return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  return `${sign}${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
 // Calculate the total duration of all sections

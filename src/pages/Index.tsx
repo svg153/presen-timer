@@ -16,7 +16,9 @@ const Index = () => {
     timeRemaining,
     isRunning,
     isWarning,
+    isOvertime,
     isSidebarOpen,
+    autoAdvance,
     setSections,
     toggleTimer,
     resetSection,
@@ -26,6 +28,7 @@ const Index = () => {
     addExtraTime,
     toggleFullscreen,
     toggleSidebar,
+    setAutoAdvance,
     endPresentation
   } = useTimer();
 
@@ -72,7 +75,11 @@ const Index = () => {
                 Presentation <span className="text-github-purple">Timer</span>
               </h1>
               
-              <SectionInput onSetSections={setSections} />
+              <SectionInput
+                onSetSections={setSections}
+                autoAdvance={autoAdvance}
+                onSetAutoAdvance={setAutoAdvance}
+              />
             </div>
           ) : (
             <div className="py-4">
@@ -80,6 +87,7 @@ const Index = () => {
                 name={sections[currentSectionIndex].name}
                 timeRemaining={timeRemaining}
                 isWarning={isWarning}
+                isOvertime={isOvertime}
                 isRunning={isRunning}
                 isLastSection={isLastSection}
                 progress={progress}
@@ -90,6 +98,8 @@ const Index = () => {
                 addExtraTime={addExtraTime}
                 toggleFullscreen={toggleFullscreen}
                 endPresentation={endPresentation}
+                autoAdvance={autoAdvance}
+                setAutoAdvance={setAutoAdvance}
                 canGoBack={canGoBack}
                 canGoForward={canGoForward}
               />
