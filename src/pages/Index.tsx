@@ -10,10 +10,13 @@ import PresenterView from '@/components/PresenterView';
 import StatsDialog from '@/components/StatsDialog';
 import useTimer from '@/hooks/useTimer';
 import useKeyboardShortcuts from '@/hooks/useKeyboardShortcuts';
+import { useMcpBridge } from '@/mcp/useMcpBridge';
+import McpBridgeStatus from '@/components/McpBridgeStatus';
 import { calculateProgress, loadFromLocalStorage } from '@/utils/timerUtils';
 import { Toaster } from '@/components/ui/sonner';
 
 const Index = () => {
+  const timer = useTimer();
   const {
     sections,
     currentSectionIndex,
@@ -41,7 +44,10 @@ const Index = () => {
     deleteSection,
     moveSection,
     addSection
-  } = useTimer();
+  } = timer;
+
+  // Exposes the timer to a local MCP server so an agent can drive it remotely.
+  const bridge = useMcpBridge(timer);
 
   const { isHelpOpen, setIsHelpOpen } = useKeyboardShortcuts({
     onToggleTimer: toggleTimer,
@@ -160,6 +166,7 @@ const Index = () => {
           onExit={toggleFullscreen}
         />
       )}
+      <McpBridgeStatus bridge={bridge} />
       <Toaster position="bottom-right" />
     </div>
   );

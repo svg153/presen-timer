@@ -144,6 +144,32 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 - Controlar el timer desde el móvil (QR + WebRTC/BroadcastChannel o pequeño servidor).
 - **Postergada**: requiere decisión de arquitectura (¿sin servidor con BroadcastChannel?, ¿peerjs?, ¿backend?) que rompería los flujos actuales. Analizar cuando P0/P1 estén estables. Ticket de decisión: #18.
+- **Actualización**: el caso «un agente controla el timer» ya está resuelto — ver **13. Control remoto por MCP ✅**. Queda pendiente el caso «móvil como mando» (QR + WebRTC o `BroadcastChannel`), que puede reutilizar el mismo contrato de comandos de `shared/mcp-protocol.js` y la capa `src/mcp/commands.ts` sin tocar el resto de la app.
+
+---
+
+### 13. Control remoto por MCP ✅
+
+**Problema**: no había forma de que un agente leyera el estado del timer ni de redefinir el guion sin tocar la UI a mano.
+
+**Spec** (implementado):
+- Servidor MCP por stdio (`mcp/server.mjs`) que el cliente MCP lanza, más un puente WebSocket en `127.0.0.1`. Efímero: sin cuenta, sin token y sin servicio alojado.
+- Contrato compartido y sin dependencias en `shared/mcp-protocol.js`, única fuente de verdad de las 14 herramientas.
+- Capa de comandos independiente del transporte en `src/mcp/commands.ts`, con validación previa y errores en español.
+- Píldora de estado en la app con la configuración del cliente lista para copiar.
+- 60 pruebas unitarias y 23 de aceptación (`npm run test:e2e`).
+
+**[AI-DECISION]** (issue maestro #4): se evaluaron tres opciones — (A) servidor MCP local por stdio + puente de bucle local, (B) MCP remoto alojado en Vercel, (C) WebMCP (`navigator.modelContext`). Se elige **A** porque no requiere cuenta, token, ni servicio alojado, y el estado sigue siendo efímero (vive solo mientras la pestaña está abierta). **B** y **C** quedan documentadas como fases posteriores en [`.planning/`](../.planning/) en lugar de descartarse. Restricción que condiciona todo: una página servida por HTTPS no puede abrir `ws://localhost` (contenido mixto, sin excepción en producción), así que el puente funciona desde `http://localhost` y GitHub Pages sigue siendo el despliegue estático.
+
+**Criterios de aceptación**:
+- [x] Un cliente MCP real puede leer el estado y redefinir el guion de una pestaña abierta.
+- [x] Los cambios estructurales repintan la UI y persisten en `localStorage`.
+- [x] Sin pestaña conectada, las herramientas devuelven un error accionable.
+- [x] El bundle de producción no incluye `ws` ni el SDK.
+
+**Archivos**: `shared/mcp-protocol.{js,d.ts}`, `mcp/server.mjs`, `mcp/e2e-driver.mjs`, `src/mcp/*`, `src/components/McpBridgeStatus.tsx`
+
+**Fases posteriores**: MCP remoto en Vercel (fase 02) y WebMCP (fase 03), documentadas en [`.planning/`](../.planning/).
 
 ---
 
