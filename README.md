@@ -1,59 +1,41 @@
-# PresenTimer
+# presen-timer ⏱️
 
-A minimalist presentation timer with section management, built as a proof of concept for a talk.
+Temporizador para presentaciones con secciones cronometradas: define las secciones de tu charla (`Introducción: 5m`, `Demo: 10m`...), y el timer avanza automáticamente con avisos sonoros y visuales para que no pierdas el hilo ni el tiempo.
 
-Define your agenda as `Section: duration` lines, then run the timer with a progress bar,
-per-section countdown, a 30-second warning state, extra-time buttons and fullscreen mode.
+## ✨ Funcionalidades
 
-## Tech stack
+- **Secciones cronometradas**: define una por línea con formato `Nombre: 5m` (minutos) o `2h` (horas)
+- **Avance automático** entre secciones con notificación sonora
+- **Aviso visual** a 30 segundos del final de cada sección
+- **Barra de progreso** global de la presentación
+- **Sidebar** con la lista de secciones y navegación directa
+- **Tiempo extra**: añade minutos sobre la marcha
+- **Pantalla completa** para proyectar
+- **Persistencia**: tus secciones se guardan en el navegador
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui + Radix UI
-- Tailwind CSS
+## 🚀 Uso
 
-Everything runs client-side: sections are kept in `localStorage` and nothing is sent to a server.
-
-## Getting started
-
-```sh
+```bash
 npm install
 npm run dev
 ```
 
-The dev server listens on http://localhost:8080/presen-timer/.
+Abre `http://localhost:8080`, escribe tus secciones y pulsa **Create Timer**.
 
-## Build
+## 🛠️ Stack
 
-```sh
-npm run build     # production bundle in dist/
-npm run preview   # serve the built bundle locally
-npm run lint      # eslint
-```
+Vite 5 · React 18 · TypeScript · shadcn/ui · Tailwind CSS 3
 
-### Base path
+## 🤖 Desarrollo con agentes IA
 
-`vite.config.ts` defaults to a base path of `/presen-timer/`, which matches the GitHub Pages
-project site at `https://svg153.github.io/presen-timer/`. Override it when hosting elsewhere:
+Este repositorio está preparado para desarrollo asistido por agentes:
 
-```sh
-VITE_BASE_PATH=/ npm run build          # custom domain or user/org page
-VITE_BASE_PATH=/some-path/ npm run build
-```
+- **[`AGENTS.md`](AGENTS.md)** — guía para agentes: stack, arquitectura, convenciones y reglas
+- **[`docs/ROADMAP.md`](docs/ROADMAP.md)** — roadmap de features priorizado con specs accionables
+- **Skills** (`.github/skills/`) — flujos reutilizables: `timer-feature`, `release`
+- **Agente personalizado** (`.github/agents/`) — `presen-timer-dev` para Copilot
+- **Decisiones IA** — issue #4, marcador `[AI-DECISION]`
 
-## Deployment
+## 📄 Licencia
 
-Pushes to `main` trigger `.github/workflows/deploy-pages.yml`, which builds the site and publishes
-it to GitHub Pages. The workflow derives the base path from the repository name and copies
-`index.html` to `404.html` so client-side routes resolve correctly.
-
-One-time setup: in the repository settings, set **Pages → Build and deployment → Source** to
-**GitHub Actions**.
-
-## Notes
-
-- `public/notification.mp3` is still a placeholder text file from the original scaffold, so the
-  end-of-section chime does not play. The app handles the failure silently. Drop a real MP3 with
-  that name into `public/` to enable it.
-- The `lovable-tagger` dev dependency only activates during `npm run dev`.
+MIT
