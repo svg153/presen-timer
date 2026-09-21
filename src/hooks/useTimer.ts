@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { saveToLocalStorage, secondsLeftFromEnd } from '@/utils/timerUtils';
+import { PresentationStats } from '@/utils/statsUtils';
 import useWakeLock from '@/hooks/useWakeLock';
 
 export interface TimerSection {
@@ -18,6 +19,8 @@ interface TimerState {
   isFullscreen: boolean;
   isSidebarOpen: boolean;
   autoAdvance: boolean;
+  stats: PresentationStats | null;
+  presentationEnded: boolean;
 }
 
 const WARNING_THRESHOLD = 30;
@@ -32,7 +35,9 @@ const useTimer = () => {
     isOvertime: false,
     isFullscreen: false,
     isSidebarOpen: true,
-    autoAdvance: true
+    autoAdvance: true,
+    stats: null,
+    presentationEnded: false
   });
 
   // Mirror of state for imperative reads (interval callbacks, actions)
@@ -45,7 +50,37 @@ const useTimer = () => {
   // The countdown is derived from Date.now() so it never drifts,
   // even with throttled background tabs or irregular interval firing.
   const endAtRef = useRef<number | null>(null);
-  
+
+  // Per-section actual-time recorder: wall-clock seconds spent RUNNING,
+  // accumulated per section index. statsStartRef marks the open segment
+  // of the current section (null while paused).
+  const statsElapsedRef = useRef<number[]>([]);
+  const statsStartRef = useRef<number | null>(null);
+
+  // Close the open segment into the accumulator for the current section.
+  const flushStats = () => {
+    const startedAt = statsStartRef.current;
+    if (startedAt === null) return;
+    const idx = stateRef.current.currentSectionIndex;
+    statsElapsedRef.current[idx] = (statsElapsedRef.current[idx] ?? 0) + (Date.now() - startedAt) / 1000;
+    statsStartRef.current = null;
+  };
+
+  // Snapshot of planned vs actual per section; the still-running segment
+  // counts live without being closed.
+  const snapshotStats = (sections: TimerSection[], currentIndex: number): PresentationStats => {
+    const startedAt = statsStartRef.current;
+    const live = startedAt !== null ? (Date.now() - startedAt) / 1000 : 0;
+    return {
+      sections: sections.map((s, i) => ({
+        name: s.name,
+        planned: s.duration,
+        actual: Math.round((statsElapsedRef.current[i] ?? 0) + (i === currentIndex ? live : 0))
+      })),
+      endedAt: Date.now()
+    };
+  };
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
 
@@ -98,10 +133,12 @@ const useTimer = () => {
         if (prev.autoAdvance && prev.currentSectionIndex < prev.sections.length - 1) {
           playNotification();
 
+          flushStats();
           const nextIndex = prev.currentSectionIndex + 1;
           const nextDuration = prev.sections[nextIndex].duration;
 
           endAtRef.current = Date.now() + nextDuration * 1000;
+          statsStartRef.current = Date.now();
 
           toast({
             title: "Next Section",
@@ -113,18 +150,22 @@ const useTimer = () => {
             currentSectionIndex: nextIndex,
             timeRemaining: nextDuration,
             isWarning: nextDuration <= WARNING_THRESHOLD,
-            isOvertime: false
+            isOvertime: false,
+            stats: snapshotStats(prev.sections, nextIndex)
           });
         } else if (prev.autoAdvance) {
           // End of presentation
           playNotification();
           endAtRef.current = null;
+          flushStats();
           setState({
             ...prev,
             timeRemaining: 0,
             isRunning: false,
             isWarning: false,
-            isOvertime: false
+            isOvertime: false,
+            stats: snapshotStats(prev.sections, prev.currentSectionIndex),
+            presentationEnded: true
           });
         } else {
           // Overtime: keep counting down into negative so the speaker
@@ -159,6 +200,8 @@ const useTimer = () => {
   // Set sections
   const setSections = useCallback((newSections: TimerSection[]) => {
     endAtRef.current = null;
+    statsElapsedRef.current = [];
+    statsStartRef.current = null;
     saveToLocalStorage(newSections);
 
     setState(prev => ({
@@ -168,7 +211,9 @@ const useTimer = () => {
       timeRemaining: newSections.length > 0 ? newSections[0].duration : 0,
       isRunning: false,
       isWarning: false,
-      isOvertime: false
+      isOvertime: false,
+      stats: null,
+      presentationEnded: false
     }));
   }, []);
   
@@ -185,18 +230,25 @@ const useTimer = () => {
         ? Math.floor((endAt - Date.now()) / 1000)
         : prev.timeRemaining;
       endAtRef.current = null;
+      flushStats();
       setState({
         ...prev,
         isRunning: false,
         timeRemaining: remaining,
-        isWarning: remaining > 0 && remaining <= WARNING_THRESHOLD
+        isWarning: remaining > 0 && remaining <= WARNING_THRESHOLD,
+        stats: snapshotStats(prev.sections, prev.currentSectionIndex)
       });
     } else {
+      // Starting after a finished presentation begins a fresh run:
+      // clear the accumulated per-section time.
+      if (prev.presentationEnded) statsElapsedRef.current = [];
       // Resume: derive a fresh end timestamp from the remaining time
       endAtRef.current = Date.now() + prev.timeRemaining * 1000;
+      statsStartRef.current = Date.now();
       setState({
         ...prev,
-        isRunning: true
+        isRunning: true,
+        presentationEnded: false
       });
     }
   }, []);
@@ -207,12 +259,16 @@ const useTimer = () => {
     if (prev.sections.length === 0) return;
 
     endAtRef.current = null;
+    // The section restarts: discard its open segment and accumulated time.
+    statsStartRef.current = null;
+    statsElapsedRef.current[prev.currentSectionIndex] = 0;
     setState({
       ...prev,
       timeRemaining: prev.sections[prev.currentSectionIndex].duration,
       isRunning: false,
       isWarning: false,
-      isOvertime: false
+      isOvertime: false,
+      stats: snapshotStats(prev.sections, prev.currentSectionIndex)
     });
   }, []);
   
@@ -227,14 +283,17 @@ const useTimer = () => {
     const newDuration = prev.sections[newIndex].duration;
 
     playNotification();
+    flushStats();
     endAtRef.current = prev.isRunning ? Date.now() + newDuration * 1000 : null;
+    if (prev.isRunning) statsStartRef.current = Date.now();
 
     setState({
       ...prev,
       currentSectionIndex: newIndex,
       timeRemaining: newDuration,
       isWarning: false,
-      isOvertime: false
+      isOvertime: false,
+      stats: snapshotStats(prev.sections, newIndex)
     });
   }, [playNotification]);
   
@@ -248,14 +307,17 @@ const useTimer = () => {
     const newIndex = prev.currentSectionIndex - 1;
     const newDuration = prev.sections[newIndex].duration;
 
+    flushStats();
     endAtRef.current = prev.isRunning ? Date.now() + newDuration * 1000 : null;
+    if (prev.isRunning) statsStartRef.current = Date.now();
 
     setState({
       ...prev,
       currentSectionIndex: newIndex,
       timeRemaining: newDuration,
       isWarning: false,
-      isOvertime: false
+      isOvertime: false,
+      stats: snapshotStats(prev.sections, newIndex)
     });
   }, []);
   
@@ -264,6 +326,7 @@ const useTimer = () => {
     const prev = stateRef.current;
     if (index < 0 || index >= prev.sections.length) return;
 
+    flushStats();
     endAtRef.current = null;
     setState({
       ...prev,
@@ -271,7 +334,8 @@ const useTimer = () => {
       timeRemaining: prev.sections[index].duration,
       isWarning: false,
       isOvertime: false,
-      isRunning: false
+      isRunning: false,
+      stats: snapshotStats(prev.sections, index)
     });
   }, []);
   
@@ -392,7 +456,12 @@ const useTimer = () => {
     }
 
     const wasCurrent = index === prev.currentSectionIndex;
-    if (wasCurrent) endAtRef.current = null;
+    if (wasCurrent) {
+      flushStats();
+      endAtRef.current = null;
+    }
+    // Keep the accumulator aligned with section indices.
+    statsElapsedRef.current.splice(index, 1);
 
     setState({
       ...prev,
@@ -401,7 +470,8 @@ const useTimer = () => {
       timeRemaining: wasCurrent ? newSections[newIndex].duration : prev.timeRemaining,
       isRunning: wasCurrent ? false : prev.isRunning,
       isWarning: wasCurrent ? false : prev.isWarning,
-      isOvertime: wasCurrent ? false : prev.isOvertime
+      isOvertime: wasCurrent ? false : prev.isOvertime,
+      stats: snapshotStats(newSections, newIndex)
     });
   }, []);
 
@@ -420,7 +490,11 @@ const useTimer = () => {
     if (index === prev.currentSectionIndex) newIndex = target;
     else if (target === prev.currentSectionIndex) newIndex = index;
 
+    flushStats();
     endAtRef.current = null;
+    [statsElapsedRef.current[index], statsElapsedRef.current[target]] =
+      [statsElapsedRef.current[target], statsElapsedRef.current[index]];
+
     setState({
       ...prev,
       sections: newSections,
@@ -428,7 +502,8 @@ const useTimer = () => {
       timeRemaining: newSections[newIndex].duration,
       isRunning: false,
       isWarning: false,
-      isOvertime: false
+      isOvertime: false,
+      stats: snapshotStats(newSections, newIndex)
     });
   }, []);
 
@@ -447,9 +522,12 @@ const useTimer = () => {
   // End presentation
   const endPresentation = useCallback(() => {
     endAtRef.current = null;
+    flushStats();
     setState(prev => ({
       ...prev,
-      isRunning: false
+      isRunning: false,
+      stats: snapshotStats(prev.sections, prev.currentSectionIndex),
+      presentationEnded: true
     }));
     
     toast({

@@ -22,6 +22,7 @@ interface TimerSectionProps {
   setAutoAdvance: (enabled: boolean) => void;
   canGoBack: boolean;
   canGoForward: boolean;
+  onOpenStats: () => void;
 }
 
 const TimerSection = ({
@@ -42,7 +43,8 @@ const TimerSection = ({
   autoAdvance,
   setAutoAdvance,
   canGoBack,
-  canGoForward
+  canGoForward,
+  onOpenStats
 }: TimerSectionProps) => {
   const timeClass = isOvertime
     ? 'text-red-500'
@@ -77,6 +79,7 @@ const TimerSection = ({
           setAutoAdvance={setAutoAdvance}
           canGoBack={canGoBack}
           canGoForward={canGoForward}
+          onOpenStats={onOpenStats}
         />
       </div>
     </div>
