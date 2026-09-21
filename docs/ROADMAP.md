@@ -70,7 +70,7 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 ---
 
-### 4. Edición de secciones 📋
+### 4. Edición de secciones ✅
 
 **Problema**: una vez creadas las secciones solo se puede navegar; editar requiere reescribir todo el bloque de texto.
 
