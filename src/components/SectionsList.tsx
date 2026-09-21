@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import PresetControls from '@/components/PresetControls';
+import BulkEditDialog from '@/components/BulkEditDialog';
 import { useI18n } from '@/i18n';
-import { Clock, List, Pencil, Plus, Trash2, X, Check, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, List, ListChecks, Pencil, Plus, Trash2, X, Check, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface SectionsListProps {
   sections: TimerSection[];
@@ -45,6 +46,7 @@ const SectionsList = ({
   const [editName, setEditName] = useState('');
   const [editMinutes, setEditMinutes] = useState('');
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const { t } = useI18n();
 
   if (!isOpen) return null;
@@ -80,16 +82,30 @@ const SectionsList = ({
               <List className="h-5 w-5 text-github-purple" />
               <h2 className="text-lg font-medium text-github-light">{t('sections.title')}</h2>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-github-muted hover:text-github-light"
-              onClick={addSection}
-              title={t('sections.addTitle')}
-              aria-label={t('sections.add')}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              {sections.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-github-muted hover:text-github-light"
+                  onClick={() => setBulkEditOpen(true)}
+                  title={t('bulkEdit.open')}
+                  aria-label={t('bulkEdit.open')}
+                >
+                  <ListChecks className="h-4 w-4" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-github-muted hover:text-github-light"
+                onClick={addSection}
+                title={t('sections.addTitle')}
+                aria-label={t('sections.add')}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -271,6 +287,13 @@ const SectionsList = ({
           compact
           sections={sections.map(s => ({ name: s.name, duration: s.duration }))}
           onLoad={onSetSections}
+        />
+
+        <BulkEditDialog
+          open={bulkEditOpen}
+          onOpenChange={setBulkEditOpen}
+          sections={sections}
+          onSetSections={onSetSections}
         />
       </div>
     </aside>

@@ -32,6 +32,17 @@ export const en = {
     cancel: 'Cancel',
     deleteAction: 'Delete',
   },
+  bulkEdit: {
+    open: 'Edit all sections as text',
+    title: 'Edit all sections',
+    subtitle: 'One section per line using the format "Name: duration" (e.g. "Intro: 5m" or "Q&A: 1h").',
+    placeholder: 'Intro: 5m\nMain content: 15m\nDemo: 10m\nQ&A: 5m',
+    preview: 'Sections detected: {count} · Total: {total}',
+    empty: 'No valid line yet. Use the format "Name: 5m".',
+    resetWarning: 'Applying restarts from the first section and stops the countdown.',
+    cancel: 'Cancel',
+    apply: 'Apply',
+  },
   controls: {
     previous: 'Previous Section',
     next: 'Next Section',

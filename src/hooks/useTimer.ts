@@ -89,7 +89,7 @@ const useTimer = () => {
   
   // Initialize audio
   useEffect(() => {
-    audioRef.current = new Audio(`${import.meta.env.BASE_URL}notification.mp3`);
+    audioRef.current = new Audio(`${import.meta.env.BASE_URL}notification.wav`);
     audioRef.current.preload = 'auto';
     
     return () => {
