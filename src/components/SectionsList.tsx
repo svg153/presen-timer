@@ -14,6 +14,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import PresetControls from '@/components/PresetControls';
 import { Clock, List, Pencil, Plus, Trash2, X, Check, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface SectionsListProps {
@@ -24,6 +25,7 @@ interface SectionsListProps {
   deleteSection: (index: number) => void;
   moveSection: (index: number, direction: -1 | 1) => void;
   addSection: () => void;
+  onSetSections: (sections: TimerSection[]) => void;
   isOpen: boolean;
 }
 
@@ -35,6 +37,7 @@ const SectionsList = ({
   deleteSection,
   moveSection,
   addSection,
+  onSetSections,
   isOpen
 }: SectionsListProps) => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -262,6 +265,12 @@ const SectionsList = ({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <PresetControls
+          compact
+          sections={sections.map(s => ({ name: s.name, duration: s.duration }))}
+          onLoad={onSetSections}
+        />
       </div>
     </aside>
   );

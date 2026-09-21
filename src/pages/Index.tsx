@@ -82,6 +82,7 @@ const Index = () => {
         deleteSection={deleteSection}
         moveSection={moveSection}
         addSection={addSection}
+        onSetSections={setSections}
         isOpen={isSidebarOpen}
       />
       
