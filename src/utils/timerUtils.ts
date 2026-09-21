@@ -81,6 +81,11 @@ export const calculateProgress = (
   return (totalElapsed / totalDuration) * 100;
 };
 
+// Seconds remaining given an absolute end timestamp (Date.now() based)
+export const secondsLeftFromEnd = (endAtMs: number, nowMs: number): number => {
+  return Math.max(0, Math.ceil((endAtMs - nowMs) / 1000));
+};
+
 // Local storage helpers
 export const STORAGE_KEY = 'presentation-timer-sections';
 
