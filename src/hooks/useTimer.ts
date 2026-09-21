@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { saveToLocalStorage, secondsLeftFromEnd } from '@/utils/timerUtils';
+import useWakeLock from '@/hooks/useWakeLock';
 
 export interface TimerSection {
   name: string;
@@ -47,6 +48,9 @@ const useTimer = () => {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
+
+  // Keep the screen awake while the timer runs (released on pause/stop).
+  useWakeLock(state.isRunning);
   
   // Initialize audio
   useEffect(() => {
