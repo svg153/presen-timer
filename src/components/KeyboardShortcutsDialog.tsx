@@ -1,28 +1,32 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useI18n } from '@/i18n';
 
 interface KeyboardShortcutsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const SHORTCUTS: Array<{ keys: string[]; action: string }> = [
-  { keys: ['Space'], action: 'Play / Pause' },
-  { keys: ['→'], action: 'Next section' },
-  { keys: ['←'], action: 'Previous section' },
-  { keys: ['R'], action: 'Reset current section' },
-  { keys: ['F'], action: 'Toggle fullscreen' },
-  { keys: ['+'], action: 'Add 1 minute' },
-  { keys: ['?'], action: 'Show / hide this help' }
-];
-
 const KeyboardShortcutsDialog = ({ open, onOpenChange }: KeyboardShortcutsDialogProps) => {
+  const { t } = useI18n();
+
+  // Built inside the component so shortcut labels follow the UI language.
+  const SHORTCUTS: Array<{ keys: string[]; action: string }> = [
+    { keys: ['Space'], action: t('shortcuts.playPause') },
+    { keys: ['→'], action: t('shortcuts.nextSection') },
+    { keys: ['←'], action: t('shortcuts.prevSection') },
+    { keys: ['R'], action: t('shortcuts.resetSection') },
+    { keys: ['F'], action: t('shortcuts.toggleFullscreen') },
+    { keys: ['+'], action: t('shortcuts.addMinute') },
+    { keys: ['?'], action: t('shortcuts.toggleHelp') }
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          <DialogTitle>{t('shortcuts.title')}</DialogTitle>
           <DialogDescription>
-            Control the timer without leaving the keyboard.
+            {t('shortcuts.subtitle')}
           </DialogDescription>
         </DialogHeader>
         <ul className="space-y-2">

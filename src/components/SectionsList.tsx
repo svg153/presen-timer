@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import PresetControls from '@/components/PresetControls';
+import { useI18n } from '@/i18n';
 import { Clock, List, Pencil, Plus, Trash2, X, Check, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface SectionsListProps {
@@ -44,6 +45,7 @@ const SectionsList = ({
   const [editName, setEditName] = useState('');
   const [editMinutes, setEditMinutes] = useState('');
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const { t } = useI18n();
 
   if (!isOpen) return null;
 
@@ -76,15 +78,15 @@ const SectionsList = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <List className="h-5 w-5 text-github-purple" />
-              <h2 className="text-lg font-medium text-github-light">Sections</h2>
+              <h2 className="text-lg font-medium text-github-light">{t('sections.title')}</h2>
             </div>
             <Button
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-github-muted hover:text-github-light"
               onClick={addSection}
-              title="Add section at the end"
-              aria-label="Add section"
+              title={t('sections.addTitle')}
+              aria-label={t('sections.add')}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -94,7 +96,7 @@ const SectionsList = ({
         <ScrollArea className="flex-1 p-2">
           {sections.length === 0 ? (
             <div className="p-4 text-github-muted text-center">
-              No sections defined
+              {t('sections.empty')}
             </div>
           ) : (
             <div className="space-y-2">
@@ -111,7 +113,7 @@ const SectionsList = ({
                       <Input
                         value={editName}
                         onChange={e => setEditName(e.target.value)}
-                        placeholder="Section name"
+                        placeholder={t('sections.namePlaceholder')}
                         className="h-8 text-sm bg-github-darker"
                         autoFocus
                         onKeyDown={e => {
@@ -127,9 +129,9 @@ const SectionsList = ({
                           value={editMinutes}
                           onChange={e => setEditMinutes(e.target.value)}
                           className="h-8 text-sm bg-github-darker"
-                          aria-label="Duration in minutes"
+                          aria-label={t('sections.durationLabel')}
                         />
-                        <span className="text-xs text-github-muted whitespace-nowrap">min</span>
+                        <span className="text-xs text-github-muted whitespace-nowrap">{t('sections.minutes')}</span>
                       </div>
                       <div className="flex justify-end gap-1">
                         <Button
@@ -137,7 +139,7 @@ const SectionsList = ({
                           size="icon"
                           className="h-7 w-7 text-github-muted hover:text-github-light"
                           onClick={() => setEditingIndex(null)}
-                          aria-label="Cancel edit"
+                          aria-label={t('sections.cancelEdit')}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -146,7 +148,7 @@ const SectionsList = ({
                           size="icon"
                           className="h-7 w-7 text-github-purple hover:text-github-light"
                           onClick={confirmEdit}
-                          aria-label="Save section"
+                          aria-label={t('sections.save')}
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -190,8 +192,8 @@ const SectionsList = ({
                           className="h-6 w-6 text-github-muted hover:text-github-light"
                           onClick={() => moveSection(index, -1)}
                           disabled={index === 0}
-                          title="Move up"
-                          aria-label={`Move ${section.name} up`}
+                          title={t('sections.moveUp')}
+                          aria-label={t('sections.moveUpNamed', { name: section.name })}
                         >
                           <ChevronUp className="h-3.5 w-3.5" />
                         </Button>
@@ -201,8 +203,8 @@ const SectionsList = ({
                           className="h-6 w-6 text-github-muted hover:text-github-light"
                           onClick={() => moveSection(index, 1)}
                           disabled={index === sections.length - 1}
-                          title="Move down"
-                          aria-label={`Move ${section.name} down`}
+                          title={t('sections.moveDown')}
+                          aria-label={t('sections.moveDownNamed', { name: section.name })}
                         >
                           <ChevronDown className="h-3.5 w-3.5" />
                         </Button>
@@ -211,8 +213,8 @@ const SectionsList = ({
                           size="icon"
                           className="h-6 w-6 text-github-muted hover:text-github-light"
                           onClick={() => startEdit(index)}
-                          title="Edit section"
-                          aria-label={`Edit ${section.name}`}
+                          title={t('sections.edit')}
+                          aria-label={t('sections.editNamed', { name: section.name })}
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
@@ -221,8 +223,8 @@ const SectionsList = ({
                           size="icon"
                           className="h-6 w-6 text-github-muted hover:text-red-400"
                           onClick={() => setDeleteIndex(index)}
-                          title="Delete section"
-                          aria-label={`Delete ${section.name}`}
+                          title={t('sections.delete')}
+                          aria-label={t('sections.deleteNamed', { name: section.name })}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -237,30 +239,29 @@ const SectionsList = ({
 
         <div className="p-3 border-t border-github-subtle">
           <div className="text-xs text-github-muted">
-            Total time: {formatTime(sections.reduce((acc, section) => acc + section.duration, 0))}
+            {t('sections.totalTime')} {formatTime(sections.reduce((acc, section) => acc + section.duration, 0))}
           </div>
         </div>
 
         <AlertDialog open={deleteIndex !== null} onOpenChange={open => !open && setDeleteIndex(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete section?</AlertDialogTitle>
+              <AlertDialogTitle>{t('sections.deleteTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                {deleteIndex !== null && (
-                  <>
-                    This will delete &quot;{sections[deleteIndex]?.name}&quot;
-                    {deleteIndex === currentSectionIndex && ' (the current section)'} and cannot be undone.
-                  </>
-                )}
+                {deleteIndex !== null &&
+                  t('sections.deleteBody', {
+                    name: sections[deleteIndex]?.name ?? '',
+                    current: deleteIndex === currentSectionIndex ? t('sections.deleteCurrent') : '',
+                  })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('sections.cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-red-600 hover:bg-red-700 text-white"
                 onClick={confirmDelete}
               >
-                Delete
+                {t('sections.deleteAction')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
