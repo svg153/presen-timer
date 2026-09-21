@@ -1,10 +1,12 @@
 
-import { Play, Pause, SkipForward, RefreshCw, ChevronLeft, Timer, Maximize, X } from 'lucide-react';
+import { Play, Pause, SkipForward, RefreshCw, ChevronLeft, Timer, Maximize, X, FastForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 
 interface TimerControlsProps {
   isRunning: boolean;
   isLastSection: boolean;
+  autoAdvance: boolean;
   toggleTimer: () => void;
   resetSection: () => void;
   nextSection: () => void;
@@ -12,6 +14,7 @@ interface TimerControlsProps {
   addExtraTime: (seconds: number) => void;
   toggleFullscreen: () => void;
   endPresentation: () => void;
+  setAutoAdvance: (enabled: boolean) => void;
   canGoBack: boolean;
   canGoForward: boolean;
 }
@@ -19,6 +22,7 @@ interface TimerControlsProps {
 const TimerControls = ({
   isRunning,
   isLastSection,
+  autoAdvance,
   toggleTimer,
   resetSection,
   nextSection,
@@ -26,6 +30,7 @@ const TimerControls = ({
   addExtraTime,
   toggleFullscreen,
   endPresentation,
+  setAutoAdvance,
   canGoBack,
   canGoForward
 }: TimerControlsProps) => {
@@ -112,6 +117,22 @@ const TimerControls = ({
         <Maximize className="h-4 w-4" />
         <span className="sr-only">Fullscreen</span>
       </Button>
+      
+      <div className="flex items-center gap-2 px-2 h-9 rounded-md border border-github-subtle bg-github-subtle/50">
+        <FastForward className="h-4 w-4 text-github-muted" />
+        <Switch
+          id="auto-advance-runtime"
+          checked={autoAdvance}
+          onCheckedChange={setAutoAdvance}
+          className="scale-90"
+        />
+        <label
+          htmlFor="auto-advance-runtime"
+          className="text-xs text-github-muted cursor-pointer select-none"
+        >
+          Auto
+        </label>
+      </div>
     </div>
   );
 };

@@ -7,6 +7,7 @@ interface TimerSectionProps {
   name: string;
   timeRemaining: number;
   isWarning: boolean;
+  isOvertime: boolean;
   isRunning: boolean;
   isLastSection: boolean;
   progress: number;
@@ -17,6 +18,8 @@ interface TimerSectionProps {
   addExtraTime: (seconds: number) => void;
   toggleFullscreen: () => void;
   endPresentation: () => void;
+  autoAdvance: boolean;
+  setAutoAdvance: (enabled: boolean) => void;
   canGoBack: boolean;
   canGoForward: boolean;
 }
@@ -25,6 +28,7 @@ const TimerSection = ({
   name,
   timeRemaining,
   isWarning,
+  isOvertime,
   isRunning,
   isLastSection,
   progress,
@@ -35,10 +39,16 @@ const TimerSection = ({
   addExtraTime,
   toggleFullscreen,
   endPresentation,
+  autoAdvance,
+  setAutoAdvance,
   canGoBack,
   canGoForward
 }: TimerSectionProps) => {
-  const timeClass = isWarning ? 'text-amber-400' : 'text-github-light';
+  const timeClass = isOvertime
+    ? 'text-red-500'
+    : isWarning
+      ? 'text-amber-400'
+      : 'text-github-light';
   
   return (
     <div className="glass-card py-8 px-6 max-w-2xl w-full mx-auto animate-fade-in">
@@ -49,13 +59,14 @@ const TimerSection = ({
           <ProgressBar progress={progress} warning={isWarning} />
         </div>
         
-        <div className={`timer-text text-6xl md:text-8xl mb-6 ${timeClass} ${isWarning ? 'animate-pulse' : ''} transition-colors duration-300`}>
+        <div className={`timer-text text-6xl md:text-8xl mb-6 ${timeClass} ${isWarning && !isOvertime ? 'animate-pulse' : ''} transition-colors duration-300`}>
           {formatTime(timeRemaining)}
         </div>
         
         <TimerControls
           isRunning={isRunning}
           isLastSection={isLastSection}
+          autoAdvance={autoAdvance}
           toggleTimer={toggleTimer}
           resetSection={resetSection}
           nextSection={nextSection}
@@ -63,6 +74,7 @@ const TimerSection = ({
           addExtraTime={addExtraTime}
           toggleFullscreen={toggleFullscreen}
           endPresentation={endPresentation}
+          setAutoAdvance={setAutoAdvance}
           canGoBack={canGoBack}
           canGoForward={canGoForward}
         />
