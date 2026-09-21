@@ -294,22 +294,27 @@ const useTimer = () => {
     });
   }, []);
   
-  // Toggle fullscreen
+  // Keep isFullscreen in sync with the real document state. The
+  // fullscreenchange event is the source of truth: it covers ESC exits,
+  // F11 and failed requestFullscreen attempts, which an optimistic
+  // setState would desync.
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      const isFs = document.fullscreenElement !== null;
+      setState(prev => (prev.isFullscreen === isFs ? prev : { ...prev, isFullscreen: isFs }));
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, []);
+
+  // Toggle fullscreen; isFullscreen is updated by the listener above.
   const toggleFullscreen = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      isFullscreen: !prev.isFullscreen
-    }));
-    
-    // Implement actual fullscreen logic
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => {
         console.error(`Error attempting to enable fullscreen: ${err.message}`);
       });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
     }
   }, []);
   

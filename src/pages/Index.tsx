@@ -6,6 +6,7 @@ import TimerSection from '@/components/TimerSection';
 import SectionInput from '@/components/SectionInput';
 import SectionsList from '@/components/SectionsList';
 import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog';
+import PresenterView from '@/components/PresenterView';
 import useTimer from '@/hooks/useTimer';
 import useKeyboardShortcuts from '@/hooks/useKeyboardShortcuts';
 import { calculateProgress, loadFromLocalStorage } from '@/utils/timerUtils';
@@ -19,6 +20,7 @@ const Index = () => {
     isRunning,
     isWarning,
     isOvertime,
+    isFullscreen,
     isSidebarOpen,
     autoAdvance,
     setSections,
@@ -131,6 +133,15 @@ const Index = () => {
       
       <Footer />
       <KeyboardShortcutsDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
+      {isFullscreen && sections.length > 0 && (
+        <PresenterView
+          name={sections[currentSectionIndex].name}
+          timeRemaining={timeRemaining}
+          isOvertime={isOvertime}
+          progress={progress}
+          onExit={toggleFullscreen}
+        />
+      )}
       <Toaster position="bottom-right" />
     </div>
   );
