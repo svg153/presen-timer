@@ -1,0 +1,27 @@
+{
+  "gsd_core_version": "1.14.0",
+  "artifacts": "hand-authored",
+  "mode": "standard",
+  "granularity": "standard",
+  "workflow": {
+    "discuss_phase": true,
+    "plan_phase": true,
+    "execute_phase": true,
+    "verify_work": true,
+    "ship": true,
+    "security_enforcement": true,
+    "nyquist_validation": true
+  },
+  "planning": {
+    "commit_docs": true
+  },
+  "phases": {
+    "active": "01-local-mcp-bridge",
+    "planned": ["02-remote-mcp-vercel", "03-webmcp-browser-agent"],
+    "deferred": ["04-hardening"]
+  },
+  "notes": [
+    "Los artefactos se escriben a mano siguiendo las plantillas de open-gsd/gsd-core en lugar de ejecutar el instalador, para no introducir .claude/ (72 skills), .github/copilot-instructions.md ni hooks en un repositorio público.",
+    "Ver .planning/onboarding/SUMMARY.md para el instalador opcional."
+  ]
+}

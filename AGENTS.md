@@ -8,7 +8,7 @@ Guía para agentes de IA (Copilot, Claude Code, Codex, Cursor...) que trabajan e
 
 ## Stack
 
-- **Build**: Vite 5 + TypeScript 5 (strict)
+- **Build**: Vite 5 + TypeScript 5 (`tsconfig.app.json` tiene `strict: false` — ojo: sin `strictNullChecks` TypeScript **no** estrecha uniones discriminadas por un literal booleano)
 - **UI**: React 18 + shadcn/ui (Radix) + Tailwind CSS 3
 - **Routing**: react-router-dom 6
 - **Notificaciones**: sonner (toasts) + Web Audio (`/notification.mp3`)
@@ -22,9 +22,12 @@ npm install        # instalar dependencias
 npm run dev        # dev server (Vite)
 npm run build      # build de producción (valida TS + bundling)
 npm run lint       # ESLint
+npm run test       # Vitest (unitarios de src/ y mcp/)
+npm run test:e2e   # aceptación del puente MCP (necesita un navegador abierto)
+npm run mcp        # arranca el servidor MCP local (stdio + puente WebSocket)
 ```
 
-No hay tests todavía. **Validación mínima antes de terminar cualquier cambio: `npm run lint && npm run build`.** Cuando se añada Vitest, ejecuta también los tests.
+**Validación mínima antes de terminar cualquier cambio: `npm run lint && npm run build && npm run test`.** Los tests son Vitest (`vitest.config.ts`, entorno `node`) sobre `src/**/*.test.ts` y `mcp/**/*.test.mjs`. `npm run test:e2e` es la prueba de aceptación del puente MCP y necesita un navegador con la app abierta, por eso no corre en CI.
 
 ## Mapa de arquitectura
 
@@ -40,10 +43,19 @@ src/
 │   ├── Navbar.tsx / Footer.tsx / ProgressBar.tsx
 │   └── ui/                  ← ⛔ NO EDITAR: componentes shadcn generados
 ├── pages/Index.tsx          ← orquestador: conecta useTimer con componentes
+├── mcp/                     ← puente MCP (solo cliente; no abre sockets propios por componente)
+│   ├── commands.ts          ← aplica las 14 herramientas sobre la API de useTimer (sin transporte)
+│   └── bridgeConnection.ts  ← singleton por pestaña: un único WebSocket + memoria de respuestas
 └── pages/NotFound.tsx
+
+mcp/                         ← lado Node (fuera de src/, no entra en el bundle del navegador)
+├── server.mjs               ← servidor MCP por stdio + puente WebSocket en 127.0.0.1
+└── e2e-driver.mjs           ← prueba de aceptación end-to-end
+
+shared/mcp-protocol.js       ← contrato sin dependencias (14 herramientas), fuente de verdad
 ```
 
-**Flujo de datos**: `Index.tsx` llama a `useTimer()` → pasa estado + callbacks como props a los componentes. Los componentes no mutan estado directamente.
+**Flujo de datos**: `Index.tsx` llama a `useTimer()` → pasa estado + callbacks como props a los componentes. Los componentes no mutan estado directamente. `useMcpBridge(timer)` expone ese mismo objeto `timer` a un servidor MCP local a través de `bridgeConnection`, que es un singleton de módulo: **una sola conexión por pestaña**, independiente de cuántas veces se monte el hook.
 
 ## Convenciones
 
