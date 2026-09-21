@@ -3,7 +3,10 @@ import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
@@ -40,6 +43,12 @@ import {
   mergePresets,
   parseImportedPresets
 } from '@/utils/importExportUtils';
+import {
+  FACTORY_TEMPLATES,
+  isTemplateValue,
+  templateFromValue,
+  templateValue
+} from '@/utils/templateUtils';
 
 interface PresetControlsProps {
   // Sections the "Save" action will store (parsed textarea in the empty
@@ -63,7 +72,10 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
   }, []);
 
   const activePreset = presets.find(p => isSameSections(p.sections, sections));
+  const activeTemplate = FACTORY_TEMPLATES.find(t => isSameSections(t.sections, sections));
+  const active = activePreset ?? activeTemplate;
   const canSave = sections.length > 0;
+  const templateSelected = isTemplateValue(selected);
 
   const handleSave = () => {
     const name = presetName.trim();
@@ -76,12 +88,18 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
     toast.success(`Preset "${name}" saved`);
   };
 
-  const handleLoad = (name: string) => {
-    setSelected(name);
-    const preset = presets.find(p => p.name === name);
+  const handleLoad = (value: string) => {
+    setSelected(value);
+    const template = templateFromValue(value);
+    if (template) {
+      onLoad(template.sections.map(s => ({ ...s })));
+      toast.info(`Template "${template.name}" loaded`);
+      return;
+    }
+    const preset = presets.find(p => p.name === value);
     if (preset) {
       onLoad(preset.sections.map(s => ({ ...s })));
-      toast.info(`Preset "${name}" loaded`);
+      toast.info(`Preset "${value}" loaded`);
     }
   };
 
@@ -137,12 +155,29 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
             <SelectValue placeholder="Load preset…" />
           </SelectTrigger>
           <SelectContent>
-            {presets.map(p => (
-              <SelectItem key={p.name} value={p.name}>
-                {p.name}
-                {isSameSections(p.sections, sections) ? ' ✓' : ''}
-              </SelectItem>
-            ))}
+            {presets.length > 0 && (
+              <>
+                <SelectGroup>
+                  <SelectLabel>Your presets</SelectLabel>
+                  {presets.map(p => (
+                    <SelectItem key={p.name} value={p.name}>
+                      {p.name}
+                      {isSameSections(p.sections, sections) ? ' ✓' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectSeparator />
+              </>
+            )}
+            <SelectGroup>
+              <SelectLabel>Templates</SelectLabel>
+              {FACTORY_TEMPLATES.map(t => (
+                <SelectItem key={t.name} value={templateValue(t.name)}>
+                  {t.name}
+                  {isSameSections(t.sections, sections) ? ' ✓' : ''}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
         <Button
@@ -156,7 +191,7 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
         <Button
           variant="outline"
           size="sm"
-          disabled={!selected}
+          disabled={!selected || templateSelected}
           onClick={() => setDeleteName(selected)}
         >
           Delete
@@ -192,9 +227,9 @@ const PresetControls = ({ sections, onLoad, compact }: PresetControlsProps) => {
           }}
         />
       </div>
-      {compact && activePreset && (
+      {compact && active && (
         <p className="text-xs text-github-muted mt-1">
-          Active preset: {activePreset.name} ({formatPresetSummary(activePreset.sections)})
+          Active {activePreset ? 'preset' : 'template'}: {active.name} ({formatPresetSummary(active.sections)})
         </p>
       )}
 
