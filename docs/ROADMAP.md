@@ -129,9 +129,10 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - Vista con `recharts` (ya en dependencias) o tabla simple; opción de copiar resumen.
 - Implementado en #15: grabador de tiempo real (wall-clock en RUNNING) por sección en `useTimer`, `StatsDialog` con gráfico recharts + tabla de diffs + copiar (tab-separated); auto-abre al terminar y botón manual en controles.
 
-### 10. Plantillas de formato 📋
+### 10. Plantillas de formato ✅
 
 - Presets incluidos de fábrica: Lightning talk (5m), Charla (20m), Taller (90m), Defensa TFG (15m)... seleccionables sin configurar nada.
+- Implementado en #16: 5 plantillas read-only en código (`templateUtils.ts`) agrupadas en el select de presets bajo "Templates"; no se siembran en localStorage (save/delete/export/import solo tocan presets de usuario); cargar una rellena el textarea y crea las secciones.
 
 ### 11. i18n + tema claro/oscuro 📋
 
