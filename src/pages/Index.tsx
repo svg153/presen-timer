@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import TimerSection from '@/components/TimerSection';
@@ -7,6 +7,7 @@ import SectionInput from '@/components/SectionInput';
 import SectionsList from '@/components/SectionsList';
 import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog';
 import PresenterView from '@/components/PresenterView';
+import StatsDialog from '@/components/StatsDialog';
 import useTimer from '@/hooks/useTimer';
 import useKeyboardShortcuts from '@/hooks/useKeyboardShortcuts';
 import { calculateProgress, loadFromLocalStorage } from '@/utils/timerUtils';
@@ -23,6 +24,8 @@ const Index = () => {
     isFullscreen,
     isSidebarOpen,
     autoAdvance,
+    stats,
+    presentationEnded,
     setSections,
     toggleTimer,
     resetSection,
@@ -49,6 +52,15 @@ const Index = () => {
     onAddExtraTime: addExtraTime,
     enabled: sections.length > 0
   });
+
+  const [statsDialogOpen, setStatsDialogOpen] = useState(false);
+
+  // Auto-open stats when the presentation ends
+  useEffect(() => {
+    if (presentationEnded) {
+      setStatsDialogOpen(true);
+    }
+  }, [presentationEnded]);
 
   // Load saved sections from localStorage on mount
   useEffect(() => {
@@ -125,6 +137,7 @@ const Index = () => {
                 setAutoAdvance={setAutoAdvance}
                 canGoBack={canGoBack}
                 canGoForward={canGoForward}
+                onOpenStats={() => setStatsDialogOpen(true)}
               />
             </div>
           )}
@@ -133,6 +146,11 @@ const Index = () => {
       
       <Footer />
       <KeyboardShortcutsDialog open={isHelpOpen} onOpenChange={setIsHelpOpen} />
+      <StatsDialog
+        open={statsDialogOpen}
+        onOpenChange={setStatsDialogOpen}
+        stats={stats}
+      />
       {isFullscreen && sections.length > 0 && (
         <PresenterView
           name={sections[currentSectionIndex].name}

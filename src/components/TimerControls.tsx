@@ -1,5 +1,5 @@
 
-import { Play, Pause, SkipForward, RefreshCw, ChevronLeft, Timer, Maximize, X, FastForward } from 'lucide-react';
+import { Play, Pause, SkipForward, RefreshCw, ChevronLeft, Timer, Maximize, X, FastForward, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 
@@ -17,6 +17,7 @@ interface TimerControlsProps {
   setAutoAdvance: (enabled: boolean) => void;
   canGoBack: boolean;
   canGoForward: boolean;
+  onOpenStats: () => void;
 }
 
 const TimerControls = ({
@@ -32,7 +33,8 @@ const TimerControls = ({
   endPresentation,
   setAutoAdvance,
   canGoBack,
-  canGoForward
+  canGoForward,
+  onOpenStats
 }: TimerControlsProps) => {
   return (
     <div className="flex flex-wrap gap-2 justify-center mt-4">
@@ -116,6 +118,16 @@ const TimerControls = ({
       >
         <Maximize className="h-4 w-4" />
         <span className="sr-only">Fullscreen</span>
+      </Button>
+
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={onOpenStats}
+        className="bg-github-subtle border-github-subtle hover:bg-github-subtle/80"
+      >
+        <BarChart3 className="h-4 w-4" />
+        <span className="sr-only">Stats</span>
       </Button>
       
       <div className="flex items-center gap-2 px-2 h-9 rounded-md border border-github-subtle bg-github-subtle/50">
