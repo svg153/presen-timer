@@ -6,7 +6,7 @@ Granularidad: estándar (5–8 fases máximas, sin estimaciones de tiempo).
 
 | # | Fase | Objetivo | Estado |
 |---|------|----------|--------|
-| 01 | `01-local-mcp-bridge` | Un agente controla el temporizador y reescribe la estructura de secciones desde `http://localhost` | **En curso** |
+| 01 | `01-local-mcp-bridge` | Un agente controla el temporizador y reescribe la estructura de secciones desde `http://localhost` | **Completada** |
 | 02 | `02-remote-mcp-vercel` | El mismo control desde cualquier red o dispositivo, con control de acceso | Planeada |
 | 03 | `03-webmcp-browser-agent` | La página expone sus herramientas al agente integrado del navegador | Planeada |
 | 04 | `04-hardening` | Reducer puro, canal push en lugar de instantáneas, deudas técnicas | Diferida |

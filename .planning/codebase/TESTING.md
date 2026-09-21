@@ -10,7 +10,7 @@ Verificación disponible en el punto de partida:
 | Mecanismo | Qué cubre |
 |-----------|-----------|
 | `npm run build` | Que el proyecto compila y produce `dist/` |
-| `npm run lint` | Reglas de ESLint (0 errores; 6 avisos heredados del scaffold) |
+| `npm run lint` | Reglas de ESLint (0 errores; 7 avisos heredados: 6 del scaffold + 1 de `src/i18n/index.tsx`) |
 | `npm run dev` / `npm run preview` | Verificación manual en navegador |
 | Workflow de Pages | Que el build se despliega correctamente |
 

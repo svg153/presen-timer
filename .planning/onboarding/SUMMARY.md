@@ -37,7 +37,7 @@ npm run dev          # servidor de desarrollo en http://localhost:8080/presen-ti
 npm run mcp          # servidor MCP + puente WebSocket (fase 01)
 npm run test         # pruebas (fase 01)
 npm run test:e2e     # aceptación MCP; requiere navegador abierto (fase 01)
-npm run lint         # ESLint (0 errores, 6 avisos heredados)
+npm run lint         # ESLint (0 errores, 7 avisos heredados)
 npm run build        # build de producción
 ```
 
@@ -78,7 +78,7 @@ Conviene hacerlo en un commit propio, para que el ruido quede aislado y sea revi
 
 - `public/notification.mp3` es un placeholder de texto: el aviso sonoro no suena.
 - 55 avisos de Dependabot (24 altos, 27 moderados, 4 bajos).
-- 6 avisos de ESLint heredados del scaffold de shadcn; 0 errores.
+- 7 avisos de ESLint heredados (6 del scaffold de shadcn + 1 de `src/i18n/index.tsx`); 0 errores.
 - La lógica del temporizador sigue viviendo dentro del hook, sin reducer puro. La PR #6 ya extrajo
   `secondsLeftFromEnd` a `src/utils/timerUtils.ts` y esta fase la cubre con pruebas.
 

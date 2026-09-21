@@ -62,8 +62,8 @@ export default Foo;
 - `react-refresh/only-export-components` como aviso,
 - `@typescript-eslint/no-unused-vars` **desactivado**.
 
-`npm run lint` parte de **0 errores y 6 avisos**, todos en el scaffold de shadcn
-(`src/components/ui/*.tsx`). La fase 01 no añade ninguno.
+`npm run lint` parte de **0 errores y 7 avisos**: seis en el scaffold de shadcn
+(`src/components/ui/*.tsx`) y uno en `src/i18n/index.tsx`. La fase 01 no añade ninguno.
 
 ## Formateo
 

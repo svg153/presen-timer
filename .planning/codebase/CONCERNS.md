@@ -51,9 +51,10 @@ proyecta mala imagen.
 
 **Severidad:** muy baja
 
-6 avisos (`react-refresh/only-export-components`), todos en el scaffold de shadcn
+7 avisos (`react-refresh/only-export-components`), seis en el scaffold de shadcn
 (`src/components/ui/badge.tsx`, `button.tsx`, `form.tsx`, `navigation-menu.tsx`, `sidebar.tsx`,
-`toggle.tsx`). Son deuda heredada, no regresiones: `npm run lint` sale con **0 errores**.
+`toggle.tsx`) y uno en `src/i18n/index.tsx`, que lo añadió la PR #17 en `main` al exportar el hook
+`useI18n` junto al provider. Son deuda heredada, no regresiones: `npm run lint` sale con **0 errores**.
 
 Los 3 errores que había originalmente (una regla `no-empty-object-type` en
 `src/components/ui/textarea.tsx` y en `tailwind.config.ts`) los corrigió la PR #5 en `main`, así que
@@ -62,7 +63,29 @@ la fase 01 no tuvo que tocarlos.
 **Riesgo colateral:** como `npm run lint` no sale completamente limpio, es fácil colar avisos nuevos
 sin darse cuenta. La fase 01 **compara contra el baseline** y no añade ninguno.
 
-## 6. La lógica del temporizador no es testeable de forma aislada
+## 6. El typecheck no está en el pipeline y estaba roto
+
+**Severidad:** media
+
+`package.json` define `"build": "vite build"`, **sin `tsc`**. esbuild borra los tipos sin
+comprobarlos, así que `.github/workflows/ci.yml` (que solo corre `lint` + `build`) puede salir en
+verde con el proyecto sin typechequear.
+
+Y de hecho estaba roto: `src/i18n/index.tsx` (PR #17) usa `String.prototype.replaceAll`, que es
+**ES2021**, mientras `tsconfig.app.json` declaraba `"lib": ["ES2020", "DOM", "DOM.Iterable"]`.
+Resultado: `npx tsc -p tsconfig.app.json --noEmit` fallaba con
+
+```
+src/i18n/index.tsx(59,23): error TS2550: Property 'replaceAll' does not exist on type 'string'.
+```
+
+**Mitigación:** se subió `lib` a `ES2021` (cambio puramente aditivo; `target` sigue en `ES2020`, así
+que la sintaxis emitida no cambia). Se detectó al rebasar la PR #8 sobre `main`.
+
+**Deuda pendiente:** añadir `tsc --noEmit` (y `npm run test`) a `.github/workflows/ci.yml`, que
+además sigue en `actions/checkout@v4` / `actions/setup-node@v4` con Node 20.
+
+## 7. La lógica del temporizador no es testeable de forma aislada
 
 **Severidad:** media
 

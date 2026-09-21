@@ -64,9 +64,13 @@ Ver la tabla de decisiones en `.planning/PROJECT.md` (D-01 … D-09).
   transitivos de desarrollo y build (`esbuild`, `vite`, `rollup`, `lodash`, `postcss`,
   `brace-expansion`…). `npm audit` reporta 25 porque cuenta avisos únicos en el árbol resuelto,
   mientras que Dependabot cuenta una alerta por cada par aviso/paquete afectado.
-- 6 avisos de ESLint preexistentes (`react-refresh/only-export-components`), todos en el scaffold
-  de shadcn. Los 3 errores que había antes los corrigió la PR #5 en `main`; esta fase no añade
-  ni un aviso nuevo.
+- 7 avisos de ESLint preexistentes (`react-refresh/only-export-components`): seis en el scaffold
+  de shadcn y uno en `src/i18n/index.tsx` (lo añadió la PR #17 en `main`). Los 3 errores que había
+  antes los corrigió la PR #5 en `main`; esta fase no añade ni un aviso nuevo.
+- El typecheck no está en el pipeline: `"build": "vite build"` no ejecuta `tsc`, así que
+  `src/i18n/index.tsx` usaba `String.prototype.replaceAll` (ES2021) con `lib: ["ES2020", …]` y
+  `npx tsc --noEmit` fallaba con TS2550 sin que CI lo notara. Corregido subiendo `lib` a `ES2021`
+  al rebasar esta fase sobre `main`. Pendiente: añadir `tsc --noEmit` y `npm run test` a `ci.yml`.
 - Sin reducer puro: la lógica del temporizador vive dentro del hook y no es directamente testeable.
   La PR #6 ya extrajo `secondsLeftFromEnd` a `src/utils/timerUtils.ts` y esta fase la cubre con pruebas.
 - `eslint.config.js` solo cubre `**/*.{ts,tsx}`, así que `mcp/*.mjs` y `shared/*.js` no se lintan.
@@ -81,5 +85,11 @@ Ver la tabla de decisiones en `.planning/PROJECT.md` (D-01 … D-09).
 ## Session Continuity
 
 - **Rama de trabajo:** worktree de sesión sobre `main` de `svg153/presen-timer`.
+- **Deriva de `main`:** mientras se trabajaba en la fase 01, `main` avanzó **20 commits / 12 PRs
+  mergeadas** (#5–#17, todas aditivas, ninguna revertida): P0-2 overtime, P0-3 atajos, P0-4 edición
+  de secciones, P1-5 presets con nombre, P1-6 import/export JSON, P1-7 PWA + Wake Lock, P1-8 modo
+  presentador, P2-9 estadísticas, P2-10 plantillas de fábrica, P2-11 i18n ES/EN + tema claro/oscuro
+  y #18 (ticket de decisión del mando remoto). La PR #8 se rebasó sobre `976ed46`; los conflictos
+  fueron solo en `docs/ROADMAP.md`, `package.json`, `package-lock.json` y `src/pages/Index.tsx`.
 - **Último hito:** fase 01 implementada y verificada end-to-end (23/23); 60 pruebas unitarias en verde.
 - **Siguiente paso:** mergear la fase 01 y, cuando el usuario quiera, arrancar la fase 02.
