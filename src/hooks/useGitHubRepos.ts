@@ -5,6 +5,7 @@ import { mergePresets, parseImportedPresets } from '@/utils/importExportUtils';
 import {
   GithubErrorKind,
   GithubRepoEntry,
+  buildRequestHeaders,
   classifyGithubStatus,
   contentsApiUrl,
   loadRepoEntries,
@@ -27,6 +28,10 @@ export interface RepoOpResult {
 export interface GitHubReposState {
   entries: GithubRepoEntry[];
   busy: Record<string, boolean>;
+  // Personal Access Token for private repos. Held in memory only (never
+  // persisted): a static web app must not store secrets in localStorage.
+  token: string | null;
+  setToken: (token: string | null) => void;
   addRepo: (input: string, pathInput: string) => Promise<RepoOpResult>;
   refreshRepo: (key: string, options?: { force?: boolean }) => Promise<RepoOpResult>;
   removeRepo: (key: string) => void;
@@ -44,8 +49,16 @@ export const useGitHubRepos = (): GitHubReposState => {
   const { t } = useI18n();
   const [entries, setEntries] = useState<GithubRepoEntry[]>(loadRepoEntries);
   const [busy, setBusy] = useState<Record<string, boolean>>({});
+  const [token, setTokenState] = useState<string | null>(null);
+  const tokenRef = useRef<string | null>(null);
   const entriesRef = useRef(entries);
   const inFlightRef = useRef<Record<string, Promise<RepoOpResult>>>({});
+
+  const setToken = useCallback((next: string | null) => {
+    const trimmed = next?.trim() || null;
+    tokenRef.current = trimmed;
+    setTokenState(trimmed);
+  }, []);
 
   useEffect(() => {
     entriesRef.current = entries;
@@ -64,11 +77,7 @@ export const useGitHubRepos = (): GitHubReposState => {
   }, []);
 
   const fetchOnce = useCallback(async (entry: GithubRepoEntry): Promise<FetchOutcome> => {
-    const headers: Record<string, string> = {
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    };
-    if (entry.etag) headers['If-None-Match'] = entry.etag;
+    const headers = buildRequestHeaders(tokenRef.current, entry.etag);
 
     let response: Response;
     try {
@@ -204,5 +213,5 @@ export const useGitHubRepos = (): GitHubReposState => {
     return () => document.removeEventListener('visibilitychange', autoRefresh);
   }, [runFetch, t]);
 
-  return { entries, busy, addRepo, refreshRepo, removeRepo };
+  return { entries, busy, token, setToken, addRepo, refreshRepo, removeRepo };
 };

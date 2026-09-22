@@ -19,6 +19,7 @@ export interface GithubRepoEntry {
 export type GithubErrorKind =
   | 'invalidInput'
   | 'notFound'
+  | 'unauthorized'
   | 'rateLimited'
   | 'invalidFormat'
   | 'network'
@@ -115,9 +116,27 @@ export const shouldRefresh = (
 
 // Maps an HTTP status to a user-facing error kind.
 export const classifyGithubStatus = (status: number): GithubErrorKind => {
+  if (status === 401) return 'unauthorized';
   if (status === 404 || status === 451) return 'notFound';
   if (status === 403 || status === 429) return 'rateLimited';
   return 'error';
+};
+
+// Builds the request headers for a Contents API call. A non-empty token is
+// sent as a Bearer credential (enables private repos and raises the rate
+// limit); the ETag enables conditional 304 responses.
+export const buildRequestHeaders = (
+  token: string | null,
+  etag: string | null
+): Record<string, string> => {
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+  const trimmed = token?.trim();
+  if (trimmed) headers.Authorization = `Bearer ${trimmed}`;
+  if (etag) headers['If-None-Match'] = etag;
+  return headers;
 };
 
 // Decodes the base64 `content` field of a Contents API response (UTF-8).

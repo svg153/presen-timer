@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { Github, RefreshCw, Trash2 } from 'lucide-react';
+import { Github, KeyRound, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -23,9 +23,10 @@ interface GitHubImportProps {
 
 const GitHubImport = ({ repos }: GitHubImportProps) => {
   const { t } = useI18n();
-  const { entries, busy, addRepo, refreshRepo, removeRepo } = repos;
+  const { entries, busy, token, setToken, addRepo, refreshRepo, removeRepo } = repos;
   const [repoInput, setRepoInput] = useState('');
   const [pathInput, setPathInput] = useState('');
+  const [tokenInput, setTokenInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [removeKey, setRemoveKey] = useState<string | null>(null);
 
@@ -36,6 +37,9 @@ const GitHubImport = ({ repos }: GitHubImportProps) => {
         break;
       case 'notFound':
         toast.error(t('github.notFoundToast'));
+        break;
+      case 'unauthorized':
+        toast.error(t('github.unauthorizedToast'));
         break;
       case 'rateLimited':
         toast.error(t('github.rateLimitedToast'));
@@ -78,6 +82,18 @@ const GitHubImport = ({ repos }: GitHubImportProps) => {
     } else {
       errorToast(result);
     }
+  };
+
+  const handleApplyToken = () => {
+    if (!tokenInput.trim()) return;
+    setToken(tokenInput);
+    setTokenInput('');
+    toast.success(t('github.tokenSetToast'));
+  };
+
+  const handleClearToken = () => {
+    setToken(null);
+    toast.info(t('github.tokenClearedToast'));
   };
 
   const confirmRemove = () => {
@@ -123,6 +139,34 @@ const GitHubImport = ({ repos }: GitHubImportProps) => {
           {submitting ? t('github.loading') : t('github.load')}
         </Button>
       </form>
+      <div className="flex items-center gap-2 mb-2">
+        <Input
+          type="password"
+          value={tokenInput}
+          onChange={e => setTokenInput(e.target.value)}
+          placeholder={t('github.tokenPlaceholder')}
+          autoComplete="off"
+          className="flex-1 min-w-0 bg-github-dark border-github-subtle text-github-text"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={!tokenInput.trim()}
+          onClick={handleApplyToken}
+        >
+          <KeyRound className="h-4 w-4 mr-1" aria-hidden />
+          {t('github.tokenApply')}
+        </Button>
+        {token && (
+          <Button type="button" variant="ghost" size="sm" onClick={handleClearToken}>
+            {t('github.tokenClear')}
+          </Button>
+        )}
+      </div>
+      {token && (
+        <p className="text-xs text-github-muted mb-2">{t('github.tokenActiveHint')}</p>
+      )}
       {entries.length > 0 && (
         <ul className="space-y-1">
           {entries.map(entry => {
