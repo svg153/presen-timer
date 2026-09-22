@@ -15,9 +15,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import PresetControls from '@/components/PresetControls';
-import BulkEditDialog from '@/components/BulkEditDialog';
+import SectionsBulkEditDialog from '@/components/SectionsBulkEditDialog';
 import { useI18n } from '@/i18n';
-import { Clock, List, ListChecks, Pencil, Plus, Trash2, X, Check, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, List, Pencil, Plus, Trash2, X, Check, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface SectionsListProps {
   sections: TimerSection[];
@@ -89,10 +89,10 @@ const SectionsList = ({
                   size="icon"
                   className="h-7 w-7 text-github-muted hover:text-github-light"
                   onClick={() => setBulkEditOpen(true)}
-                  title={t('bulkEdit.open')}
-                  aria-label={t('bulkEdit.open')}
+                  title={t('sections.bulkEdit')}
+                  aria-label={t('sections.bulkEdit')}
                 >
-                  <ListChecks className="h-4 w-4" />
+                  <Pencil className="h-4 w-4" />
                 </Button>
               )}
               <Button
@@ -289,11 +289,11 @@ const SectionsList = ({
           onLoad={onSetSections}
         />
 
-        <BulkEditDialog
+        <SectionsBulkEditDialog
           open={bulkEditOpen}
           onOpenChange={setBulkEditOpen}
           sections={sections}
-          onSetSections={onSetSections}
+          onApply={onSetSections}
         />
       </div>
     </aside>

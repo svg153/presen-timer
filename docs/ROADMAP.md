@@ -119,6 +119,28 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 - **Criterios**: fullscreen real; colores cambian en los umbrales; legible a distancia (texto ≥ 20vh).
 - Implementado en #14: overlay `PresenterView`, umbrales persistidos en localStorage, `isFullscreen` sincronizado con evento `fullscreenchange`.
 
+### 13. Edición masiva de secciones (texto) ✅
+
+**Problema**: el formato original del proyecto es pegar texto `Nombre: duración` línea a línea (`SectionInput`), pero una vez creado el temporizador ajustar varias secciones obliga a editarlas una a una con el lápiz de cada fila, y el `+` crea secciones sin tiempo en varios clics.
+
+**Spec**:
+- Botón lápiz en la cabecera del sidebar de secciones, a la izquierda del `+`, con el mismo estilo que el lápiz de cada sección.
+- Abre un diálogo con **todas las secciones en el formato de texto original**, una por línea: `Nombre: 5m` / `Nombre: 2h` (autopuesto con `sectionsToText(sections)`, el mismo formato de presets/plantillas).
+- Copiar/pegar/editar el texto y "Aplicar" reemplaza todas las secciones de golpe (vía `setSections`: vuelve a la sección 1 y detiene el timer, como al cargar un preset).
+- Validación estricta en `src/utils/sectionsEditUtils.ts` (`parseSectionsStrict`): a diferencia de `parseSections` (que descarta líneas inválidas en silencio), reporta la línea problemática con su número; error visible por toast y estado intacto.
+- Textos de UI en i18n ES/EN (claves `sections.bulk*`).
+
+**Criterios de aceptación**:
+- [x] El lápiz de la cabecera abre el editor con las secciones actuales autopuestas en formato texto.
+- [x] Pegar una lista `Nombre: 5m` y aplicar reemplaza todas las secciones en dos clics.
+- [x] Línea sin `:` o con duración inválida → error visible con el número de línea, secciones sin tocar.
+- [x] El formato es round-trip con presets/plantillas (`sectionsToText`/`parseSections`).
+- [x] `npm run lint && npm run build` en verde.
+
+- Implementado en #22: `SectionsBulkEditDialog` + `parseSectionsStrict`; lápiz en cabecera de `SectionsList`. `[AI-DECISION]`: `lastIndexOf(':')` permite nombres con dos puntos; errores de validación en inglés (precedente `parseImportedPresets`).
+
+**Archivos**: `src/components/SectionsList.tsx`, `src/components/SectionsBulkEditDialog.tsx` (nuevo), `src/utils/sectionsEditUtils.ts` (nuevo), `src/i18n/en.ts`, `src/i18n/es.ts`
+
 ---
 
 ## P2 — Diferenciación
@@ -150,7 +172,9 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 ## P3 — Extensibilidad
 
-### 13. Edición masiva de secciones ✅
+### 13. Edición masiva de secciones ✅ (sustituida)
+
+> ⚠️ **Sustituida por la spec 13 de P1** (PR #24, issue #22): mismo formato texto `Nombre: 5m`, pero con lápiz junto al `+`, validación estricta con número de línea (`parseSectionsStrict`) e i18n `sections.bulk*`. El diálogo `BulkEditDialog` de esta entrada y sus claves `bulkEdit.*` se eliminan con esa PR; siguen vigentes el `[AI-DECISION]` de descartar JSON y el fix `lastIndexOf(':')` de `parseSections`.
 
 **Problema**: cargar un guion entero (plantilla o preset) es fácil, pero editarlo después obliga a ir sección a sección con el lápiz de cada fila. No hay forma de reescribir todo el guion de golpe.
 
