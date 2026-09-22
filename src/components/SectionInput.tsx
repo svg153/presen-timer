@@ -31,9 +31,11 @@ const SectionInput = ({ onSetSections, autoAdvance, onSetAutoAdvance, github }: 
     }
   };
 
+  // On the home screen a preset is only a proposal: it fills the textarea so
+  // the user can edit it before starting. The timer starts via "Create
+  // sections" below. (Sidebar preset loading still replaces sections at once.)
   const handleLoadPreset = (presetSections: { name: string; duration: number }[]) => {
     setInputText(sectionsToText(presetSections));
-    onSetSections(presetSections);
   };
 
   return (

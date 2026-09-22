@@ -4,6 +4,10 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Vite 8 warns about `__dirname` because it plans to load the config natively
+// (no transpile step), where only `import.meta.dirname` exists.
+const rootDir = import.meta.dirname;
+
 // GitHub Pages project sites are served from https://<user>.github.io/<repo>/,
 // so the bundle needs a matching base path. Override with VITE_BASE_PATH (e.g. "/")
 // when serving from a user/org page or a custom domain.
@@ -22,7 +26,7 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'notification.mp3', 'og-image.png'],
+      includeAssets: ['favicon.ico', 'notification.wav', 'og-image.png'],
       manifest: {
         name: 'PresenTimer - Presentation Timer App',
         short_name: 'PresenTimer',
@@ -38,13 +42,13 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,mp3}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,wav}']
       }
     }),
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(rootDir, "./src"),
     },
   },
 }));
