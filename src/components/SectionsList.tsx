@@ -83,16 +83,18 @@ const SectionsList = ({
               <h2 className="text-lg font-medium text-github-light">{t('sections.title')}</h2>
             </div>
             <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-github-muted hover:text-github-light"
-                onClick={() => setBulkEditOpen(true)}
-                title={t('sections.bulkEdit')}
-                aria-label={t('sections.bulkEdit')}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
+              {sections.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-github-muted hover:text-github-light"
+                  onClick={() => setBulkEditOpen(true)}
+                  title={t('sections.bulkEdit')}
+                  aria-label={t('sections.bulkEdit')}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
