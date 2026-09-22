@@ -141,6 +141,28 @@ Leyenda de estado: 📋 especificada · 🚧 en curso · ✅ hecha · ⏸️ pos
 
 **Archivos**: `src/components/SectionsList.tsx`, `src/components/SectionsBulkEditDialog.tsx` (nuevo), `src/utils/sectionsEditUtils.ts` (nuevo), `src/i18n/en.ts`, `src/i18n/es.ts`
 
+### 14. Preset → cuadro de texto en la home ✅
+
+**Problema**: al seleccionar un preset o plantilla en la página principal (sin temporizador activo), `handleLoadPreset` en `SectionInput` rellena el textarea pero **además** llama a `onSetSections`, lo que lanza la presentación al instante y hace perder la home con el cuadro de texto. El usuario no puede revisar ni ajustar el preset antes de empezar; si quiere editar, debe volver atrás y recargar.
+
+**Spec**:
+- Seleccionar un preset/plantilla en la home solo **rellena el textarea** (`setInputText(sectionsToText(...))`) en el formato texto original `Nombre: 5m`; no se crea el temporizador ni se navega.
+- "Crear temporizador" sigue siendo la única vía de lanzar la presentación desde la home: con el texto editado o tal cual (enviar directo sin edición sigue costando un clic).
+- El total de tiempo y la previsualización parseada (`parsedSections`) se recalculan solos del textarea, como al teclear.
+- No cambia la carga de presets **desde el sidebar** (`SectionsList` → `onLoad={onSetSections}`): allí sustituye las secciones activas de golpe (no hay textarea que editar en ese contexto).
+- Se mantiene el toast de "preset cargado".
+
+**Criterios de aceptación**:
+- [x] Elegir un preset en la home → textarea relleno en formato texto, la home permanece visible, el timer no arranca.
+- [x] Editar el texto y pulsar "Crear temporizador" → se lanzan las secciones editadas.
+- [x] Pulsar "Crear temporizador" sin editar → se lanzan las secciones del preset tal cual.
+- [x] Cargar un preset desde el sidebar sigue reemplazando las secciones activas directamente.
+- [x] `npm run lint && npm run build` en verde.
+
+**Archivos**: `src/components/SectionInput.tsx`
+
+Ticket: #25. `[AI-DECISION]`: el mismo `onLoad` de `PresetControls` toma dos semánticas según contexto (home = propuesta editable en el textarea; sidebar = sustitución inmediata) en vez de unificar comportamiento: son flujos distintos del usuario.
+
 ---
 
 ## P2 — Diferenciación
