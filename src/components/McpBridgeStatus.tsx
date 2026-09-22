@@ -67,14 +67,21 @@ const McpBridgeStatus = ({ bridge }: McpBridgeStatusProps) => {
                 servidores en la nube).
               </p>
 
-              <p className="mb-1 text-github-light font-medium">1. Arranca la app y el servidor MCP</p>
+              <p className="mb-1 text-github-light font-medium">Arranca el servidor MCP</p>
+              <p className="mb-2 text-xs text-github-muted">
+                Ejecuta esto en una terminal del repositorio:
+              </p>
               <pre className="mb-3 overflow-x-auto rounded bg-github-darker p-2 text-xs text-github-text">
 {`npm install
 npm run dev     # abre http://localhost:8080/presen-timer/
 npm run mcp     # --port ${port} si lo cambias`}
               </pre>
 
-              <p className="mb-1 text-github-light font-medium">2. Añade el servidor a tu cliente MCP</p>
+              <p className="mb-1 text-github-light font-medium">Configura tu cliente MCP</p>
+              <p className="mb-2 text-xs text-github-muted">
+                Si usas Claude Code, Copilot CLI o Cursor, añade esto a su configuración para que
+                arranque el servidor automáticamente (no necesitas el paso anterior):
+              </p>
               <div className="relative">
                 <pre className="overflow-x-auto rounded bg-github-darker p-2 pr-10 text-xs text-github-text">
 {config}
