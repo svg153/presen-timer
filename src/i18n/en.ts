@@ -6,6 +6,12 @@ export const en = {
     shortcutsTitle: 'Keyboard shortcuts (?)',
     theme: 'Toggle theme',
     language: 'Language',
+    sound: {
+      title: 'Notification sound',
+      enable: 'Sound on',
+      volume: 'Volume',
+      test: 'Test sound',
+    },
   },
   sections: {
     title: 'Sections',

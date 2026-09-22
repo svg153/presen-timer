@@ -8,6 +8,12 @@ export const es: Dictionary = {
     shortcutsTitle: 'Atajos de teclado (?)',
     theme: 'Cambiar tema',
     language: 'Idioma',
+    sound: {
+      title: 'Sonido de aviso',
+      enable: 'Sonido activado',
+      volume: 'Volumen',
+      test: 'Probar sonido',
+    },
   },
   sections: {
     title: 'Secciones',

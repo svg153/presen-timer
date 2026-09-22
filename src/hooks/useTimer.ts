@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { saveToLocalStorage, secondsLeftFromEnd } from '@/utils/timerUtils';
 import { PresentationStats } from '@/utils/statsUtils';
+import { playNotificationSound, unlockAudio, type SoundPreferences } from '@/utils/soundUtils';
 import useWakeLock from '@/hooks/useWakeLock';
 
 export interface TimerSection {
@@ -25,7 +26,8 @@ interface TimerState {
 
 const WARNING_THRESHOLD = 30;
 
-const useTimer = () => {
+// Sound preferences come from useSoundSettings; the timer only reads them.
+const useTimer = (sound?: SoundPreferences) => {
   const [state, setState] = useState<TimerState>({
     sections: [],
     currentSectionIndex: 0,
@@ -81,29 +83,23 @@ const useTimer = () => {
     };
   };
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
 
   // Keep the screen awake while the timer runs (released on pause/stop).
   useWakeLock(state.isRunning);
-  
-  // Initialize audio
+
+  // Latest sound preferences for playNotification, which must stay stable
+  // across renders. The effect keys on primitives because the caller passes a
+  // new object identity on every render.
+  const muted = sound?.muted ?? false;
+  const volume = sound?.volume ?? 1;
+  const soundRef = useRef<SoundPreferences>({ muted, volume });
   useEffect(() => {
-    audioRef.current = new Audio(`${import.meta.env.BASE_URL}notification.wav`);
-    audioRef.current.preload = 'auto';
-    
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
+    soundRef.current = { muted, volume };
+  }, [muted, volume]);
 
   const playNotification = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.play().catch(err => console.error('Failed to play audio:', err));
-    }
+    playNotificationSound(soundRef.current);
   }, []);
 
   // Timer tick: derive remaining seconds from the end timestamp
@@ -242,6 +238,9 @@ const useTimer = () => {
       // Starting after a finished presentation begins a fresh run:
       // clear the accumulated per-section time.
       if (prev.presentationEnded) statsElapsedRef.current = [];
+      // Browsers only allow audio after a gesture: open the context here so the
+      // chime can sound later, when a section ends on its own.
+      unlockAudio();
       // Resume: derive a fresh end timestamp from the remaining time
       endAtRef.current = Date.now() + prev.timeRemaining * 1000;
       statsStartRef.current = Date.now();

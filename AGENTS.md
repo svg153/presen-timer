@@ -11,7 +11,7 @@ Guía para agentes de IA (Copilot, Claude Code, Codex, Cursor...) que trabajan e
 - **Build**: Vite 8 + TypeScript 5 (`tsconfig.app.json` tiene `strict: false` — ojo: sin `strictNullChecks` TypeScript **no** estrecha uniones discriminadas por un literal booleano)
 - **UI**: React 18 + shadcn/ui (Radix) + Tailwind CSS 3
 - **Routing**: react-router-dom 7
-- **Notificaciones**: sonner (toasts) + Web Audio (`/notification.wav`)
+- **Notificaciones**: sonner (toasts) + Web Audio (ding sintetizado en `src/utils/soundUtils.ts`; fallback `public/notification.wav`)
 - **Estado**: `useState`/hooks locales. **No hay estado global** (no Redux/Zustand) — no introducirlo sin necesidad.
 - **Gestor de paquetes**: npm (hay `bun.lockb` heredado de Lovable, ignóralo; usa `package-lock.json`)
 
@@ -26,6 +26,7 @@ npm run lint       # ESLint
 npm run test       # Vitest (unitarios de src/ y mcp/)
 npm run test:e2e   # aceptación del puente MCP (necesita un navegador abierto)
 npm run mcp        # arranca el servidor MCP local (stdio + puente WebSocket)
+node scripts/generate-notification-wav.mjs  # regenera public/notification.wav (fallback del ding)
 ```
 
 **Validación mínima antes de terminar cualquier cambio: `npm run lint && npm run typecheck && npm run test && npm run build`.** Ojo: `npm run build` es `vite build` a secas, **no** comprueba tipos — para eso está `npm run typecheck`, que además es un paso obligatorio de CI (`.github/workflows/ci.yml`). Los tests son Vitest (`vitest.config.ts`, entorno `node`) sobre `src/**/*.test.ts` y `mcp/**/*.test.mjs`. `npm run test:e2e` es la prueba de aceptación del puente MCP y necesita un navegador con la app abierta, por eso no corre en CI.
@@ -35,8 +36,10 @@ npm run mcp        # arranca el servidor MCP local (stdio + puente WebSocket)
 ```
 src/
 ├── hooks/useTimer.ts        ← NÚCLEO: todo el estado del timer vive aquí
+├── hooks/useSoundSettings.ts← preferencias de sonido (muted/volume) + localStorage
 ├── hooks/useGitHubRepos.ts  ← fetch repos GitHub: ETag/304, throttle 10min, refresco auto (P2-13)
 ├── utils/timerUtils.ts      ← funciones PURAS (parse, format, cálculos, localStorage)
+├── utils/soundUtils.ts      ← ding Web Audio (sine 880 Hz + armónico) y su fallback
 ├── utils/githubUtils.ts     ← funciones PURAS GitHub: parseo repo, storage, ETag/sha, base64 (P2-13)
 ├── components/              ← componentes presentacionales (reciben props, sin estado de timer)
 │   ├── TimerSection.tsx     ← pantalla principal del timer

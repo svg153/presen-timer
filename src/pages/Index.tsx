@@ -9,15 +9,19 @@ import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog';
 import PresenterView from '@/components/PresenterView';
 import StatsDialog from '@/components/StatsDialog';
 import useTimer from '@/hooks/useTimer';
+import useSoundSettings from '@/hooks/useSoundSettings';
 import useKeyboardShortcuts from '@/hooks/useKeyboardShortcuts';
 import { useGitHubRepos } from '@/hooks/useGitHubRepos';
 import { useMcpBridge } from '@/mcp/useMcpBridge';
 import McpBridgeStatus from '@/components/McpBridgeStatus';
 import { calculateProgress, loadFromLocalStorage } from '@/utils/timerUtils';
+import { playChime, unlockAudio } from '@/utils/soundUtils';
 import { Toaster } from '@/components/ui/sonner';
 
 const Index = () => {
-  const timer = useTimer();
+  const sound = useSoundSettings();
+
+  const timer = useTimer({ muted: sound.muted, volume: sound.volume });
   const {
     sections,
     currentSectionIndex,
@@ -97,7 +101,18 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar toggleSidebar={toggleSidebar} onOpenHelp={() => setIsHelpOpen(true)} />
+      <Navbar
+        toggleSidebar={toggleSidebar}
+        onOpenHelp={() => setIsHelpOpen(true)}
+        muted={sound.muted}
+        volume={sound.volume}
+        onToggleMuted={sound.toggleMuted}
+        onVolumeChange={sound.setVolume}
+        onTestSound={() => {
+          unlockAudio();
+          playChime(sound.volume);
+        }}
+      />
       
       <SectionsList
         sections={sections}
