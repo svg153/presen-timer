@@ -35,12 +35,15 @@ npm run mcp        # arranca el servidor MCP local (stdio + puente WebSocket)
 ```
 src/
 ├── hooks/useTimer.ts        ← NÚCLEO: todo el estado del timer vive aquí
+├── hooks/useGitHubRepos.ts  ← fetch repos GitHub: ETag/304, throttle 10min, refresco auto (P2-13)
 ├── utils/timerUtils.ts      ← funciones PURAS (parse, format, cálculos, localStorage)
+├── utils/githubUtils.ts     ← funciones PURAS GitHub: parseo repo, storage, ETag/sha, base64 (P2-13)
 ├── components/              ← componentes presentacionales (reciben props, sin estado de timer)
 │   ├── TimerSection.tsx     ← pantalla principal del timer
 │   ├── TimerControls.tsx    ← botones play/pause/reset/next/prev/fullscreen
 │   ├── SectionsList.tsx     ← sidebar con lista de secciones
 │   ├── SectionInput.tsx     ← textarea para definir secciones
+│   ├── GitHubImport.tsx     ← panel para cargar presets desde un repo público (P2-13)
 │   ├── Navbar.tsx / Footer.tsx / ProgressBar.tsx
 │   └── ui/                  ← ⛔ NO EDITAR: componentes shadcn generados
 ├── pages/Index.tsx          ← orquestador: conecta useTimer con componentes

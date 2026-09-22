@@ -10,6 +10,7 @@ import PresenterView from '@/components/PresenterView';
 import StatsDialog from '@/components/StatsDialog';
 import useTimer from '@/hooks/useTimer';
 import useKeyboardShortcuts from '@/hooks/useKeyboardShortcuts';
+import { useGitHubRepos } from '@/hooks/useGitHubRepos';
 import { useMcpBridge } from '@/mcp/useMcpBridge';
 import McpBridgeStatus from '@/components/McpBridgeStatus';
 import { calculateProgress, loadFromLocalStorage } from '@/utils/timerUtils';
@@ -60,6 +61,10 @@ const Index = () => {
   });
 
   const [statsDialogOpen, setStatsDialogOpen] = useState(false);
+
+  // Mounted once here so GitHub repo auto-refresh works app-wide; the
+  // panel that consumes it lives inside SectionInput.
+  const githubRepos = useGitHubRepos();
 
   // Auto-open stats when the presentation ends
   useEffect(() => {
@@ -120,6 +125,7 @@ const Index = () => {
                 onSetSections={setSections}
                 autoAdvance={autoAdvance}
                 onSetAutoAdvance={setAutoAdvance}
+                github={githubRepos}
               />
             </div>
           ) : (

@@ -7,15 +7,18 @@ import { TimerSection } from '@/hooks/useTimer';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import PresetControls from '@/components/PresetControls';
+import GitHubImport from '@/components/GitHubImport';
+import { GitHubReposState } from '@/hooks/useGitHubRepos';
 import { useI18n } from '@/i18n';
 
 interface SectionInputProps {
   onSetSections: (sections: TimerSection[]) => void;
   autoAdvance: boolean;
   onSetAutoAdvance: (enabled: boolean) => void;
+  github: GitHubReposState;
 }
 
-const SectionInput = ({ onSetSections, autoAdvance, onSetAutoAdvance }: SectionInputProps) => {
+const SectionInput = ({ onSetSections, autoAdvance, onSetAutoAdvance, github }: SectionInputProps) => {
   const { t } = useI18n();
   // Sample content is user data: it's set once on mount and won't follow later language changes.
   const [inputText, setInputText] = useState(() => t('input.example'));
@@ -43,6 +46,8 @@ const SectionInput = ({ onSetSections, autoAdvance, onSetAutoAdvance }: SectionI
       </p>
       
       <PresetControls sections={parsedSections} onLoad={handleLoadPreset} />
+
+      <GitHubImport repos={github} />
 
       <Textarea
         value={inputText}

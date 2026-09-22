@@ -247,6 +247,21 @@ Ticket: #25. `[AI-DECISION]`: el mismo `onLoad` de `PresetControls` toma dos sem
 **Archivos**: `shared/mcp-protocol.{js,d.ts}`, `mcp/server.mjs`, `mcp/e2e-driver.mjs`, `src/mcp/*`, `src/components/McpBridgeStatus.tsx`
 **Fases posteriores**: MCP remoto en Vercel (fase 02) y WebMCP (fase 03), documentadas en [`.planning/`](../.planning/).
 
+### 15. Cargar presentación desde repositorio GitHub 🚧
+
+- El usuario introduce un repo público (`owner/repo` o URL) que contiene un fichero `presen-timer.json` (mismo formato que el export/import de P1-6; ruta configurable). La app lo descarga vía GitHub Contents API y fusiona sus presets en los locales.
+- El repo queda **guardado en localStorage** (`presentation-timer-github-repos`) para volver a él; al reabrir, se **actualiza automáticamente** si el fichero cambió, y hay botón de **update forzado**.
+- **Rate limits**: peticiones condicionales con `ETag`/`If-None-Match` (los 304 no consumen cuota de los 60 req/h no autenticados) + throttle de refresco automático (máx. 1 comprobación/repo/10 min, al abrir la app o recuperar visibilidad; sin `setInterval` agresivo). Errores 404/403/429/red tratados con mensajes claros; sin red se usa la caché.
+- **Criterios de aceptación**:
+  - [ ] Cargar repo público válido → sus presets aparecen y se pueden usar.
+  - [ ] Reabrir la app → el repo sigue en la lista, datos cacheados visibles, refresco en segundo plano solo si procede.
+  - [ ] Fichero sin cambios → 304, sin consumo de cuota, sin toast de actualización.
+  - [ ] Fichero cambiado → presets actualizados + aviso; botón "Actualizar" fuerza la comprobación.
+  - [ ] Repo inexistente / sin fichero / rate limit → error visible, estado intacto.
+- **Archivos**: `src/utils/githubUtils.ts` (nuevo), `src/hooks/useGitHubRepos.ts` (nuevo), `src/components/GitHubImport.tsx` (nuevo), `src/components/SectionInput.tsx`, `src/i18n/*`.
+- Tickets: #21 (núcleo) y #23 (UI + refresco), cerrados por #27. `[AI-DECISION]`: formato JSON propio (descartado YAML: dependencia sin justificar), solo repos públicos en v1 (PAT privado queda futuro).
+- **Estado**: implementado en #27 y validado (lint+build+tests en verde, smoke test de la Contents API con ETag/304).
+
 ---
 
 ## Notas para agentes
